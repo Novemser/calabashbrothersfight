@@ -6,7 +6,8 @@
 out
 server/pkg/linux_amd64/content.a
 server/pkg/linux_amd64/execution.a
-
+server/pkg/windows_amd64/execution.a
+server/pkg/windows_amd64/content.a
 # Binaries for programs and plugins
 *.exe
 *.dll
