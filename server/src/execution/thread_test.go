@@ -6,8 +6,11 @@ import (
 )
 
 func TestNewThread(t *testing.T) {
-	gc := NewGlobalContext()
-	gc.values["a"] = GlobalStateType{value: 0, name: "a"}
+	gc := NewGlobalContext(Pair{
+		"a",
+		GlobalStateType{value:0, name:"a"},
+	})
+	//gc.values["a"] = GlobalStateType{value: 0, name: "a"}
 	/**
 	a = 0;
 	if (a == 3) {
@@ -25,8 +28,12 @@ func TestNewThread(t *testing.T) {
 	context := NewThreadContext(0, 0, 0, []Instruction{assign, ifUp, assignIn, ifEnd})
 	for i := 0; i < 3; {
 		ins := context.Instructions[i]
-		ins.Execute(gc, &context)
+		ins.Execute(gc, context)
 		i = context.ProgramCounter
 	}
 	fmt.Println(gc.values["a"])
+}
+
+func TestLevel(t *testing.T) {
+
 }

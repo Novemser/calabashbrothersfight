@@ -11,34 +11,47 @@ var gameState = new(GameState)
 var undoHistory = list.New()
 
 func saveForUndo() {
-	var history = History{gameState.threadContext, gameState.globalState}
+	var history = History{gameState.threadContexts, gameState.globalState}
 	undoHistory.PushBack(history)
 }
 
 //TODO
-func startLevel(levelName string) {
+func StartLevel(levelName string) {
 	//清空
 	for e := undoHistory.Front(); e != nil; e = e.Next() {
 		undoHistory.Remove(e)
 	}
+
+	// 开始
+	var level = Level1
+	gameState.globalState = *level.GlobalContext
+	gameState.threadContexts = level.ThreadContexts
+	gameState.level = *level
+
+	for i := 0; i < len(level.ThreadContexts[0].Instructions); i++ {
+		stepThread(0)
+	}
 }
+
 func areAllThreadsBlocked() bool {
 	return false
 }
+
 func areAllThreadsFinished() bool {
 	return false
 }
+
 func checkForVictoryConditions() {
 	var howManyCriticalSections = 0
 
-	for threadId, t := range gameState.level.threads {
+	for threadId, t := range gameState.level.ThreadContexts {
 
 		if IsThreadFinished(threadId) {
 			continue
 		}
-		var thread = gameState.level.threads[threadId]
+		var thread = gameState.level.ThreadContexts[threadId]
 		var instructions = thread.Instructions
-		var threadState = gameState.threadContext[threadId]
+		var threadState = gameState.threadContexts[threadId]
 		var programCounter = threadState.ProgramCounter
 		var currentInstruction = instructions[programCounter]
 		fmt.Print(currentInstruction)
@@ -49,10 +62,12 @@ func checkForVictoryConditions() {
 
 		fmt.Println(t)
 	}
+
 	if howManyCriticalSections >= 2 {
 		win("Two threads were in a critical section at the same time.")
 		return
 	}
+
 	if areAllThreadsBlocked() {
 		win("A deadlock occurred - all threads were blocked simultaneously.")
 		return
@@ -63,16 +78,18 @@ func checkForVictoryConditions() {
 		return
 	}
 }
+
 func win(winInfo string) {
 	fmt.Print(winInfo)
 }
+
 func lose(loseInfo string) {
 	fmt.Print(loseInfo)
 }
 
 func expandThread(threadId int) {
 	saveForUndo()
-	gameState.threadContext[threadId].Expanded = true
+	gameState.threadContexts[threadId].Expanded = true
 }
 
 func undo() {
@@ -80,7 +97,7 @@ func undo() {
 	for e := undoHistory.Front(); e != nil; e = e.Next() {
 		if e.Next() == nil {
 			gameState.globalState = e.Value.(History).globalContext
-			gameState.threadContext = e.Value.(History).threadContext
+			gameState.threadContexts = e.Value.(History).threadContext
 			undoHistory.Remove(e)
 		}
 	}
@@ -92,7 +109,7 @@ func stepThread(thread int) {
 	////sendEvent('Gameplay', 'level-first-step', gameState.getLevelId());
 	//}
 	var program = gameState.GetProgramOfThread(thread)
-	var threadState = gameState.threadContext[thread]
+	var threadState = gameState.threadContexts[thread]
 	var pc = threadState.ProgramCounter
 
 	if IsThreadFinished(thread) {
@@ -113,7 +130,7 @@ func stepThread(thread int) {
 func IsThreadFinished(threadId int) bool {
 	program := gameState.GetProgramOfThread(threadId)
 	var maxInstructions = len(program)
-	var threadState = gameState.threadContext[threadId]
+	var threadState = gameState.threadContexts[threadId]
 	var pc = threadState.ProgramCounter
 
 	return pc >= maxInstructions
@@ -163,7 +180,7 @@ var movies = []Movie{
 }
 
 func main() {
-
+	//startLevel("L1")
 	app := iris.New()
 
 	app.Controller("/movies", new(MoviesController))

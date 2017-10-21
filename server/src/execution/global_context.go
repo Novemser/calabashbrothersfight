@@ -4,8 +4,20 @@ type GlobalContext struct {
 	values map[string]GlobalStateType
 }
 
-func NewGlobalContext() *GlobalContext {
+type Pair struct {
+	key string
+	value GlobalStateType
+}
+
+func NewGlobalContext(args...Pair) *GlobalContext {
+	mapCtx := make(map[string]GlobalStateType)
+	for _, pair := range args {
+		mapCtx[pair.key] = pair.value
+	}
+
 	return &GlobalContext{
-		values: make(map[string]GlobalStateType),
+		values: mapCtx,
 	}
 }
+
+
