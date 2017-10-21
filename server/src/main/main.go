@@ -24,7 +24,7 @@ func startLevel(levelId int) {
 	for e := undoHistory.Front(); e != nil; e = e.Next() {
 		undoHistory.Remove(e)
 	}
-
+	gameState = new(c.GameState)
 	// 开始
 	var level = c.Level1
 	gameState.GlobalState = level.GlobalContext
