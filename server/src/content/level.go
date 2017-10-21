@@ -8,7 +8,7 @@ type Level struct {
 	Label          string
 	Title          string
 	Description    string
-	ThreadContexts []e.ThreadContext
+	ThreadContexts []*e.ThreadContext
 	GlobalContext  *e.GlobalContext
 }
 
@@ -16,9 +16,9 @@ var Level1 = &Level{
 	"教程",
 	"魔鬼般的赋值语句",
 	"欢迎来到葫芦娃的王国。在这里,7只英勇的葫芦娃将与诡计多端的白骨精展开一场计算机科学的较量……",
-	[]e.ThreadContext{
+	[]*e.ThreadContext{
 		e.DefaultThreadContext(
-			0, []e.Instruction{
+			0, &[]e.Instruction{
 				e.NewAssignmentInstruction("a",
 					e.NewAdditionExpression(
 						e.NewVariableExpression("a"),
@@ -36,7 +36,7 @@ var Level1 = &Level{
 			},
 		),
 		e.DefaultThreadContext(
-			1, []e.Instruction{
+			1, &[]e.Instruction{
 				e.NewAssignmentInstruction("a",
 					e.NewAdditionExpression(
 						e.NewVariableExpression("a"),

@@ -4,16 +4,16 @@ type ThreadContext struct {
 	Id                int
 	ProgramCounter    int // program counter
 	ExpProgramCounter int // expanded instruction program counter
-	Instructions      []Instruction
+	Instructions      *[]Instruction
 	Expanded          bool
 	TempVariable      interface{} // Temp variable to store Value
 }
 
-func DefaultThreadContext(id int, insList []Instruction) ThreadContext {
-	return *NewThreadContext(id, 0, 0, insList)
+func DefaultThreadContext(id int, insList *[]Instruction) *ThreadContext {
+	return NewThreadContext(id, 0, 0, insList)
 }
 
-func NewThreadContext(id, pc, epc int, insList []Instruction) *ThreadContext {
+func NewThreadContext(id, pc, epc int, insList *[]Instruction) *ThreadContext {
 	return &ThreadContext{
 		id, pc, epc, insList, false, nil,
 	}

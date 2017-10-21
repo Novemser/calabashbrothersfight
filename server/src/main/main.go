@@ -27,7 +27,7 @@ func startLevel(levelId int) {
 
 	// 开始
 	var level = c.Level1
-	gameState.GlobalState = *level.GlobalContext
+	gameState.GlobalState = level.GlobalContext
 	gameState.ThreadContexts = level.ThreadContexts
 	gameState.Level = *level
 
@@ -53,7 +53,7 @@ func checkForVictoryConditions() {
 			continue
 		}
 		var thread = gameState.Level.ThreadContexts[threadId]
-		var instructions = thread.Instructions
+		var instructions = *thread.Instructions
 		var threadState = gameState.ThreadContexts[threadId]
 		var programCounter = threadState.ProgramCounter
 		var currentInstruction = instructions[programCounter]
@@ -119,9 +119,9 @@ func stepThread(thread int) {
 		saveForUndo()
 		if threadState.Expanded {
 			//展开了的情况
-			program[pc].GetExpandInstructions()[threadState.ExpProgramCounter].Execute(&gameState.GlobalState, &threadState)
+			program[pc].GetExpandInstructions()[threadState.ExpProgramCounter].Execute(gameState.GlobalState, threadState)
 		} else {
-			program[pc].Execute(&gameState.GlobalState, &threadState)
+			program[pc].Execute(gameState.GlobalState, threadState)
 		}
 		checkForVictoryConditions()
 
@@ -223,7 +223,7 @@ func packageData() LevelInfo {
 	for _, pro := range gameState.ThreadContexts {
 		p := Program{}
 
-		for _, co := range pro.Instructions {
+		for _, co := range *pro.Instructions {
 			coder := Coder{}
 			coder.Code = co.GetCode()
 			coder.Name = co.GetName()
@@ -285,10 +285,11 @@ func main() {
 	app.Get("/api/level/{id}", func(ctx iris.Context) {
 		levelIdStr := ctx.Params().Get("id")
 		levelId, err := strconv.Atoi(levelIdStr)
+		startLevel(levelId)
 		ctx.JSON(loadLevel(levelId, err))
 	})
 	// 步进展开代码
-	app.Get("/api/stepExpandedThread/{level}/{thread}/{currentLine}/{currentSubLine}", func(ctx iris.Context) {
+	app.Get("/api/stepthread/{level}/{thread}/{currentLine}", func(ctx iris.Context) {
 		thread := ctx.Params().Get("thread")
 		levelIdStr := ctx.Params().Get("id")
 		levelId, err := strconv.Atoi(levelIdStr)

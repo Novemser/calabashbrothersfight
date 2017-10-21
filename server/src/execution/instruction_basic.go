@@ -45,7 +45,7 @@ func moveToNextInstruction(tc *ThreadContext) {
 	if tc.Expanded {
 		tc.ExpProgramCounter++
 
-		expandInsLen := len(tc.Instructions[tc.ProgramCounter].GetExpandInstructions())
+		expandInsLen := len((*tc.Instructions)[tc.ProgramCounter].GetExpandInstructions())
 		// End of expandInstruction
 		if tc.ExpProgramCounter >= expandInsLen {
 			tc.Expanded = false
@@ -255,7 +255,7 @@ func goToInstruction(context *ThreadContext, num int) {
 }
 
 func findMatchingInsIndex(context *ThreadContext, name string, tp reflect.Type) int {
-	for i, ins := range context.Instructions {
+	for i, ins := range *context.Instructions {
 		if reflect.TypeOf(ins) == tp && ins.GetName() == name {
 			fmt.Println(reflect.TypeOf(ins), tp)
 			return i
