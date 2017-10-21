@@ -21,7 +21,7 @@
 					<mu-raised-button icon="play_arrow" label="步进" @click="stepThread(thread)"
 					  	:disabled="!program['canStepNext']"></mu-raised-button>
 					<mu-raised-button icon="zoom_in" label="展开" @click="expand(thread)"
-						:disabled="false"></mu-raised-button>
+						:disabled="!program['canCurrentExpand']"></mu-raised-button>
 				</div>
 				<div class="code">
 					<div v-for="(expression, index) in program['code']">
@@ -33,7 +33,7 @@
 						<div class="instruction" v-if="expression['expanded']" :key="_index"
 							 v-for="(_expression, _index) in expression['expandInstructions']"
 							 :class="{ current: program['current'][1] === _index }" >
-							<span class="indent">{{ _expression['indent'] + 2 | showTab }}</span>
+							<span class="indent">{{ expression['indent'] + 1 | showTab }}</span>
 							<span class="block" :title="_expression['description']"
 								  v-html="highlight(_expression['code'], _expression['name'])"></span>
 						</div>
@@ -80,13 +80,31 @@
 					if (response && response.data) {
 						const data = response.data
 						if (data.status === 0) {
-							this.load(data.data, cb)
+							this.load(this.setIndent(data.data), cb)
 						} else {
 							this.openDialog('错误', data.msg)
 							console.error(data.msg)
 						}
 					}
 				}).catch(console.error.bind(this))
+			},
+			setIndent (data) {
+				const programs = data.programs
+				for (let p = 0; p < programs.length; p++) {
+					const program = programs[p]['code']
+					let indent = 0
+					for (let i = 0; i < program.length; i++) {
+						const code = program[i]
+						code.indent = indent
+						if (['If statement', 'While statement'].indexOf(code.description) !== -1) {
+							indent++
+						} else if (['End if statement', 'End of while'].indexOf(code.description) !== -1) {
+							indent--
+							code.indent = indent
+						}
+					}
+				}
+				return data
 			},
 			mock () {
 				return {
@@ -301,7 +319,7 @@
 		},
 		filters: {
 			showTab: function (quantity) {
-				return new Array(quantity).fill(' ').join('')
+				return new Array(quantity).fill('  ').join('')
 			}
 		}
 	}
