@@ -34,7 +34,7 @@ func NewMutexLockIns(name string) *MutexLockInstruction {
 	return &MutexLockInstruction{
 		baseInstruction{
 			Code: InstructionExpr(
-				MemberCall("Mutex", MethodCall("Lock")),
+				MemberCall(name, MethodCall("Lock")),
 			),
 			Name:        name,
 			Description: "A mutex lock",
@@ -46,7 +46,7 @@ func NewMutexUnLockIns(name string) *MutexUnlockInstruction {
 	return &MutexUnlockInstruction{
 		baseInstruction{
 			Code: InstructionExpr(
-				MemberCall("Mutex", MethodCall("UnLock")),
+				MemberCall(name, MethodCall("UnLock")),
 			),
 			Name:        name,
 			Description: "A mutex unlock",
@@ -76,6 +76,7 @@ func (i *MutexUnlockInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 		if lockObj.LockCount <= 0 {
 			lockObj.LastLockedThreadID = -1
 		}
+		moveToNextInstruction(tc)
 	} else {
 		panic("WTF R UU doing??")
 	}

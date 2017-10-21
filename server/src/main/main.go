@@ -41,7 +41,12 @@ func startLevel(levelId int) {
 }
 
 func areAllThreadsBlocked() bool {
-	return false
+	for _, ctx := range gameState.ThreadContexts {
+		if !IsThreadBlocked(ctx.Id) {
+			return false
+		}
+	}
+	return true
 }
 
 func areAllThreadsFinished() bool {

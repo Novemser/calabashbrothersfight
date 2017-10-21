@@ -125,16 +125,48 @@ func GetLevel(id int) *Level {
 			e.NewGlobalContext(e.Pair{
 				Key: "mutex", Value: e.GlobalStateType{Name: "mutex", Value: &e.Lock{LastLockedThreadID: -1, LockCount: 0}},
 			}, e.Pair{
-				Key: "i", Value: e.GlobalStateType{Name: "i", Value: 1},
+				Key: "i", Value: e.GlobalStateType{Name: "i", Value: 0},
 			}),
 		}
-	//case 3:
-		//return &Level{
-		//	"",
-		//	"",
-		//	"",
-		//
-		//}
+	case 3:
+		return &Level{
+			"初级教程4",
+			"武功再高也怕菜刀",
+			"葫芦兄弟正在和白骨精正面战斗，老爷爷这时却遇到了麻烦，蛇精化身为3头巨蛇怪来吃他，没有葫芦兄弟那样本领的爷爷只好手握菜刀，伺机而动。他发现这三头巨蛇虽然强大，但是并不灵活，爷爷想到用死锁的方法，然这3个头互相攻击，循环等待，击败巨蛇。",
+			[]*e.ThreadContext{
+				e.DefaultThreadContext(0, &[]e.Instruction{
+					e.NewForStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "for"),
+					e.NewMutexLockIns("MutexA"),
+					e.NewMutexLockIns("MutexB"),
+					e.NewMutexUnLockIns("MutexA"),
+					e.NewMutexUnLockIns("MutexB"),
+					e.NewEndForIns("for"),
+				}),
+				e.DefaultThreadContext(1, &[]e.Instruction{
+					e.NewForStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "for"),
+					e.NewMutexLockIns("MutexB"),
+					e.NewMutexLockIns("MutexC"),
+					e.NewMutexUnLockIns("MutexB"),
+					e.NewMutexUnLockIns("MutexC"),
+					e.NewEndForIns("for"),
+				}),
+				e.DefaultThreadContext(2, &[]e.Instruction{
+					e.NewForStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "for"),
+					e.NewMutexLockIns("MutexC"),
+					e.NewMutexLockIns("MutexA"),
+					e.NewMutexUnLockIns("MutexA"),
+					e.NewMutexUnLockIns("MutexC"),
+					e.NewEndForIns("for"),
+				}),
+			},
+			e.NewGlobalContext(e.Pair{
+				Key: "MutexA", Value: e.GlobalStateType{Name: "MutexA", Value: &e.Lock{LastLockedThreadID: -1, LockCount: 0}},
+			}, e.Pair{
+				Key: "MutexB", Value: e.GlobalStateType{Name: "MutexB", Value: &e.Lock{LastLockedThreadID: -1, LockCount: 0}},
+			}, e.Pair{
+				Key: "MutexC", Value: e.GlobalStateType{Name: "MutexC", Value: &e.Lock{LastLockedThreadID: -1, LockCount: 0}},
+			}),
+		}
 	default:
 		return nil
 	}
