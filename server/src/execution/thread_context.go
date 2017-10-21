@@ -6,4 +6,5 @@ type ThreadContext struct{
 	ExpProgramCounter int // expanded instruction program counter
 	Instructions []Instruction
 	Expanded bool
+	TempVariable interface{} // Temp variable to store value
 }

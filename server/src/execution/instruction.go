@@ -1,5 +1,9 @@
 package execution
 
+import (
+	"reflect"
+)
+
 type Instruction interface {
 	GetCode() string
 	GetDescription() string
@@ -66,6 +70,35 @@ type IfInstruction struct {
 	exp Expression
 }
 
+type EndIfInstruction struct {
+	baseInstruction
+}
+
+type ExpandableInstruction struct {
+	baseInstruction
+}
+
+type AtomicAssignmentToTemp struct {
+	baseInstruction
+	expr Expression
+}
+
+type AtomicAssignmentFromTemp struct {
+	baseInstruction
+}
+
+//func NewAtomicAssignToTemp(expr Expression) AtomicAssignmentToTemp {
+//	base := baseInstruction{
+//		Code:"temp"
+//	}
+//}
+//
+//func NewAssignmentStatment(varName string, exp Expression)  {
+//	expIns := []Expression{
+//
+//	}
+//}
+
 func NewStartIfStatment(exp Expression, name string) IfInstruction {
 	base := baseInstruction{
 		Code:        IfStart() + AddBraces(exp) + Then(),
@@ -73,6 +106,19 @@ func NewStartIfStatment(exp Expression, name string) IfInstruction {
 		Name:        name,
 	}
 	return IfInstruction{base, exp}
+}
+
+func NewEndIfStatment(name string) EndIfInstruction {
+	base := baseInstruction{
+		Code:        End(),
+		Description: "End if statement",
+		Name:        name,
+	}
+	return EndIfInstruction{base}
+}
+
+func (e *EndIfInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
+	moveToNextInstruction(tc)
 }
 
 func (c *CommentInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
@@ -87,8 +133,24 @@ func (i *IfInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 	if (i.exp.Evaluate(gc, tc)).(bool) {
 		moveToNextInstruction(tc)
 	} else {
-
+		matchingEndIf := findMatchingInsIndex(tc, i.GetName(), reflect.Type(EndIfInstruction{}))
+		goToInstruction(tc, matchingEndIf)
 	}
+}
+
+func goToInstruction(context *ThreadContext, num int) {
+	context.ProgramCounter = num
+	context.ExpProgramCounter = 0
+}
+
+func findMatchingInsIndex(context *ThreadContext, name string, tp reflect.Type) int {
+	for i, ins := range context.Instructions {
+		if reflect.Type(ins) == tp && ins.GetName() == name {
+			return i
+		}
+	}
+	panic("挂了吧")
+	return -1
 }
 
 func IfStart() string {
@@ -101,4 +163,12 @@ func AddBraces(expCode Expression) string {
 
 func Then() string {
 	return "{"
+}
+
+func End() string {
+	return "}"
+}
+
+func InstructionExpr(code string) string {
+	return code + ";"
 }

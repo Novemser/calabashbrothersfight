@@ -22,8 +22,23 @@ type AdditionExpression struct {
 	right Expression
 }
 
+type LiteralExpression struct {
+	baseExpression
+	value interface{}
+}
+
+func NewLiteralExpression(value interface{}) LiteralExpression {
+	return LiteralExpression{baseExpression{
+		Code: string(value),
+	}, value}
+}
+
+func (e *LiteralExpression) Evaluate(gc *GlobalContext, tc *ThreadContext) interface{} {
+	return e.value
+}
+
 func (e *VariableExpression) Evaluate(gc *GlobalContext, tc *ThreadContext) interface{} {
-	return gc.values[e.Name]
+	return gc.values[e.Name].value
 }
 
 func (e *AdditionExpression) Evaluate(gc *GlobalContext, tc *ThreadContext) interface{} {
@@ -37,4 +52,3 @@ func (e *AdditionExpression) Evaluate(gc *GlobalContext, tc *ThreadContext) inte
 		return float64(lVal) + float64(rVal)
 	}
 }
-
