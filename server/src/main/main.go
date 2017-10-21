@@ -277,7 +277,7 @@ func main() {
 		levelIdStr := ctx.Params().Get("level")
 		levelId, err := strconv.Atoi(levelIdStr)
 		threadId, err := strconv.Atoi(thread)
-		expandThread(threadId)
+		stepThread(threadId)
 		ctx.JSON(loadLevel(levelId, err))
 	})
 
