@@ -6,6 +6,7 @@ type Instruction interface {
 	GetName() string
 	GetExpandInstructions() []Instruction
 	Execute(gc *GlobalContext, tc *ThreadContext)
+	IsBlocking(gc *GlobalContext, tc *ThreadContext) bool
 }
 
 type baseInstruction struct {
@@ -29,6 +30,10 @@ func (i *baseInstruction) GetName() string {
 
 func (i *baseInstruction) GetExpandInstructions() []Instruction {
 	return i.ExpandInstructions
+}
+
+func (i *baseInstruction) IsBlocking(gc *GlobalContext, tc *ThreadContext) bool {
+	return false
 }
 
 func moveToNextInstruction(tc *ThreadContext) {
@@ -56,10 +61,44 @@ type DummyInstruction struct {
 	baseInstruction
 }
 
+type IfInstruction struct {
+	baseInstruction
+	exp Expression
+}
+
+func NewStartIfStatment(exp Expression, name string) IfInstruction {
+	base := baseInstruction{
+		Code:        IfStart() + AddBraces(exp) + Then(),
+		Description: "If statement",
+		Name:        name,
+	}
+	return IfInstruction{base, exp}
+}
+
 func (c *CommentInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 	moveToNextInstruction(tc)
 }
 
 func (d *DummyInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 	moveToNextInstruction(tc)
+}
+
+func (i *IfInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
+	if bool(i.exp.Evaluate(gc, tc)) {
+		moveToNextInstruction(tc)
+	} else {
+
+	}
+}
+
+func IfStart() string {
+	return "if"
+}
+
+func AddBraces(expCode Expression) string {
+	return " (" + expCode.GetCode() + ") "
+}
+
+func Then() string {
+	return "{"
 }
