@@ -133,7 +133,7 @@ func (i *IfInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 	if (i.exp.Evaluate(gc, tc)).(bool) {
 		moveToNextInstruction(tc)
 	} else {
-		matchingEndIf := findMatchingInsIndex(tc, i.GetName(), reflect.Type(EndIfInstruction{}))
+		matchingEndIf := findMatchingInsIndex(tc, i.GetName(), reflect.TypeOf(EndIfInstruction{}))
 		goToInstruction(tc, matchingEndIf)
 	}
 }
@@ -145,7 +145,7 @@ func goToInstruction(context *ThreadContext, num int) {
 
 func findMatchingInsIndex(context *ThreadContext, name string, tp reflect.Type) int {
 	for i, ins := range context.Instructions {
-		if reflect.Type(ins) == tp && ins.GetName() == name {
+		if reflect.TypeOf(ins) == tp && ins.GetName() == name {
 			return i
 		}
 	}
