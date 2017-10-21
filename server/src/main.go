@@ -39,11 +39,11 @@ func checkForVictoryConditions() {
 		var threadState = gameState.threadContext[threadId]
 		var programCounter = threadState.ProgramCounter
 		var currentInstruction = instructions[programCounter]
-
+		fmt.Print(currentInstruction)
 		//TODO
-		if currentInstruction.isCriticalSection {
-			howManyCriticalSections++
-		}
+		//if currentInstruction.isCriticalSection {
+		//	howManyCriticalSections++
+		//}
 
 		fmt.Println(t)
 	}
@@ -72,11 +72,17 @@ func expandThread(threadId int) {
 	saveForUndo()
 	gameState.threadContext[threadId].Expanded = true
 }
-//func undo() {
-//	var last = JSON.parse(undoHistory.pop())
-//	gameState.threadState = last.threadState
-//	gameState.globalState = last.globalState
-//}
+
+func undo() {
+
+	for e := undoHistory.Front(); e != nil; e = e.Next() {
+		if e.Next() == nil {
+			gameState.globalState = e.Value.(History).globalContext
+			gameState.threadContext = e.Value.(History).threadContext
+			undoHistory.Remove(e)
+		}
+	}
+}
 
 func stepThread(thread int) {
 	//if IsLevelPristine() {
