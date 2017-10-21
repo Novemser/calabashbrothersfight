@@ -73,6 +73,16 @@
 		.introduction
 			.high-light
 				color red
+		.panel
+			display flex
+			flex-flow row nowrap
+			justify-content space-between
+			align-items flex-start
+			.introduction
+				margin 0
+			.source-controls
+				display flex
+				flex-flow row
 		.source
 			display flex
 			flex-flow row
