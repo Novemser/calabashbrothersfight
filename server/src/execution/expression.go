@@ -11,6 +11,14 @@ type baseExpression struct {
 	Name string
 }
 
+func (e *baseExpression) GetCode() string {
+	return e.Code
+}
+
+func (e *baseExpression) GetName() string {
+	return e.Name
+}
+
 type VariableExpression struct {
 	baseExpression
 }
@@ -25,6 +33,20 @@ type AdditionExpression struct {
 type LiteralExpression struct {
 	baseExpression
 	value interface{}
+}
+
+func NewVariableExpression(name string) VariableExpression {
+	base := baseExpression{
+		Code: name,
+	}
+	return VariableExpression{base}
+}
+
+func NewAdditionExpression(left Expression, right Expression) AdditionExpression {
+	base := baseExpression{
+		Code: BinaryOperationCode(left, right, "+"),
+	}
+	return AdditionExpression{base, left, right}
 }
 
 func NewLiteralExpression(value interface{}) LiteralExpression {
@@ -51,4 +73,8 @@ func (e *AdditionExpression) Evaluate(gc *GlobalContext, tc *ThreadContext) inte
 	default:
 		return float64(lVal) + float64(rVal)
 	}
+}
+
+func BinaryOperationCode(l Expression, r Expression, op string) string {
+	return l.GetCode() + " " + op + " " + r.GetCode()
 }

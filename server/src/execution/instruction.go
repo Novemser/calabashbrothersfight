@@ -85,19 +85,40 @@ type AtomicAssignmentToTemp struct {
 
 type AtomicAssignmentFromTemp struct {
 	baseInstruction
+	expr Expression
 }
 
-//func NewAtomicAssignToTemp(expr Expression) AtomicAssignmentToTemp {
-//	base := baseInstruction{
-//		Code:"temp"
-//	}
-//}
-//
-//func NewAssignmentStatment(varName string, exp Expression)  {
-//	expIns := []Expression{
-//
-//	}
-//}
+func NewExpandableInstruction(name string, expandIns []Instruction) ExpandableInstruction {
+	return ExpandableInstruction{}
+}
+
+func NewAtomicAssignFromTemp(exprLeft Expression) AtomicAssignmentFromTemp {
+	base := baseInstruction{
+		Code:        InstructionExpr(AssignmentExpr(exprLeft, &NewVariableExpression("temp"))),
+		Description: "Atomic assign temp to left expr",
+	}
+	return AtomicAssignmentFromTemp{base, exprLeft}
+}
+
+func NewAtomicAssignToTemp(exprRight Expression) AtomicAssignmentToTemp {
+	base := baseInstruction{
+		Code:        InstructionExpr(AssignmentExpr(&NewVariableExpression("temp"), exprRight)),
+		Description: "Atomic assign right expr to temp",
+	}
+	return AtomicAssignmentToTemp{base, exprRight}
+}
+
+func NewAssignmentStatment(varName string, exp Expression) ExpandableInstruction {
+	expInsList := []Instruction{
+		&NewAtomicAssignToTemp(exp),
+		&NewAtomicAssignFromTemp(&NewVariableExpression(varName)),
+	}
+	
+	expIns := NewExpandableInstruction(
+		AssignmentExpr(&NewVariableExpression(varName), exp), expInsList)
+
+	return expIns
+}
 
 func NewStartIfStatment(exp Expression, name string) IfInstruction {
 	base := baseInstruction{
@@ -115,6 +136,17 @@ func NewEndIfStatment(name string) EndIfInstruction {
 		Name:        name,
 	}
 	return EndIfInstruction{base}
+}
+
+func (e *AtomicAssignmentFromTemp) Execute(gc *GlobalContext, tc *ThreadContext) {
+	gc.values[string(e.expr.Evaluate(gc, tc))] =
+		GlobalStateType{value: tc.TempVariable, name: e.expr.GetName()}
+}
+
+func (e *AtomicAssignmentToTemp) Execute(gc *GlobalContext, tc *ThreadContext) {
+	// TODO: Do we really need to evaluate?
+	tc.TempVariable = e.expr.Evaluate(gc, tc)
+	moveToNextInstruction(tc)
 }
 
 func (e *EndIfInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
@@ -171,4 +203,8 @@ func End() string {
 
 func InstructionExpr(code string) string {
 	return code + ";"
+}
+
+func AssignmentExpr(left Expression, right Expression) string {
+	return BinaryOperationCode(left, right, "=")
 }
