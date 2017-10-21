@@ -8,6 +8,7 @@ import (
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/middleware/logger"
 	"strconv"
+	"execution"
 )
 
 var gameState = new(c.GameState)
@@ -26,7 +27,7 @@ func startLevel(levelId int) {
 	}
 	gameState = new(c.GameState)
 	// 开始
-	var level = c.Level1
+	var level = c.GetLevel(1)
 	gameState.GlobalState = level.GlobalContext
 	gameState.ThreadContexts = level.ThreadContexts
 	gameState.Level = *level
@@ -169,11 +170,14 @@ type Program struct {
 	Code             []Coder `json:"code"`
 }
 type Coder struct {
-	Name        string `json:"name"`
-	Code        string `json:"code"`
-	Indent      int    `json:"indent"`
-	Description string `json:"description"`
+	Name               string  `json:"name"`
+	Code               string  `json:"code"`
+	Indent             int     `json:"indent"`
+	Description        string  `json:"description"`
+	ExpandInstructions []Coder `json:"expandInstructions"`
+	Expanded           bool    `json:"expanded"`
 }
+
 type BackResponse struct {
 	Status int       `json:"status"`
 	Msg    string    `json:"msg"`
@@ -183,6 +187,30 @@ type BackResponse struct {
 type ContextType struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
+}
+
+func canBeExpanded(ins []execution.Instruction) bool {
+	if len(ins) > 0 {
+		return true
+	} else {
+		return false
+	}
+
+}
+
+func getExpandInstructions(instruction []execution.Instruction) []Coder {
+	cders := []Coder{}
+	for _, v := range instruction {
+		o := Coder{}
+		o.Name = v.GetName()
+		o.Code = v.GetCode()
+		o.Expanded = canBeExpanded(v.GetExpandInstructions())
+		o.ExpandInstructions = nil
+		o.Indent = 0
+		o.Description = v.GetDescription()
+		cders = append(cders, o)
+	}
+	return cders
 }
 
 func packageData() LevelInfo {
@@ -201,6 +229,9 @@ func packageData() LevelInfo {
 			coder.Name = co.GetName()
 			coder.Description = co.GetDescription()
 			coder.Indent = 0
+			coder.ExpandInstructions = getExpandInstructions(co.GetExpandInstructions())
+			coder.Expanded = pro.Expanded
+
 			p.Code = append(p.Code, coder)
 		}
 
