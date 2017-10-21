@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Calabash Brothers VS Multi-thread</title>
+	<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+	<!--<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">-->
+	<style>
+		@font-face {
+			font-family: 'Material Icons';
+			font-style: normal;
+			font-weight: 400;
+			src: url(http://s.baixing.net/font/materialicons.woff2) format('woff2');
+		}
+
+		.material-icons {
+			font-family: 'Material Icons';
+			font-weight: normal;
+			font-style: normal;
+			font-size: 24px;
+			line-height: 1;
+			letter-spacing: normal;
+			text-transform: none;
+			display: inline-block;
+			white-space: nowrap;
+			word-wrap: normal;
+			direction: ltr;
+			-webkit-font-feature-settings: 'liga';
+			-webkit-font-smoothing: antialiased;
+		}
+
+		.loading-border {
+			position: fixed;
+			height: 100%;
+			width: 100%;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.loading {
+			width: 60px;
+			height: 60px;
+
+			position: relative;
+		}
+
+		.double-bounce1, .double-bounce2 {
+			width: 100%;
+			height: 100%;
+			border-radius: 50%;
+			background-color: #2196f3;
+			opacity: 0.6;
+			position: absolute;
+			top: 0;
+			left: 0;
+
+			-webkit-animation: bounce 2.0s infinite ease-in-out;
+			animation: bounce 2.0s infinite ease-in-out;
+		}
+
+		.double-bounce2 {
+			-webkit-animation-delay: -1.0s;
+			animation-delay: -1.0s;
+		}
+
+		@-webkit-keyframes bounce {
+			0%, 100% {
+				-webkit-transform: scale(0.0)
+			}
+			50% {
+				-webkit-transform: scale(1.0)
+			}
+		}
+
+		@keyframes bounce {
+			0%, 100% {
+				transform: scale(0.0);
+				-webkit-transform: scale(0.0);
+			}
+			50% {
+				transform: scale(1.0);
+				-webkit-transform: scale(1.0);
+			}
+		}
+	</style>
+</head>
+<body>
+<div id="app">
+	<div class="loading-border">
+		<div class="loading">
+			<div class="double-bounce1"></div>
+			<div class="double-bounce2"></div>
+		</div>
+	</div>
+</div>
+<!-- built files will be auto injected -->
+</body>
+</html>

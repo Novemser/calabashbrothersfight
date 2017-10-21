@@ -2,6 +2,7 @@ package execution
 
 import (
 	"reflect"
+	"fmt"
 )
 
 type Instruction interface {
@@ -76,7 +77,6 @@ type EndIfInstruction struct {
 
 type ExpandableInstruction struct {
 	baseInstruction
-	expandIns []Instruction
 }
 
 type AtomicAssignmentToTemp struct {
@@ -89,11 +89,28 @@ type AtomicAssignmentFromTemp struct {
 	expr Expression
 }
 
+// If more than one thread entered critical section,
+// The player win
+type CriticalSectionExpression struct {
+	baseInstruction
+}
+
+func NewCriticalSectionExpression() *CriticalSectionExpression {
+	return &CriticalSectionExpression{
+		baseInstruction{
+			Code:InstructionExpr("criticalSection()"),
+			Name:"Critical section",
+			Description:"Critical section",
+		},
+	}
+}
+
 func NewExpandableInstruction(name string, expandIns []Instruction) *ExpandableInstruction {
 	return &ExpandableInstruction{baseInstruction{
-		Code: name,
-		Name: "Expandable ins",
-	}, expandIns}
+		Code:               name,
+		Name:               "Expandable ins",
+		ExpandInstructions: expandIns,
+	}}
 }
 
 func NewAtomicAssignFromTemp(exprLeft Expression) *AtomicAssignmentFromTemp {
@@ -133,7 +150,7 @@ func NewStartIfStatement(exp Expression, name string) *IfInstruction {
 	return &IfInstruction{base, exp}
 }
 
-func NewEndIfStatment(name string) *EndIfInstruction {
+func NewEndIfStatement(name string) *EndIfInstruction {
 	base := baseInstruction{
 		Code:        End(),
 		Description: "End if statement",
@@ -142,14 +159,23 @@ func NewEndIfStatment(name string) *EndIfInstruction {
 	return &EndIfInstruction{base}
 }
 
-func (e *ExpandableInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
-	
+func (e *CriticalSectionExpression) Execute(gc *GlobalContext, tc *ThreadContext) {
 	moveToNextInstruction(tc)
 }
 
+func (e *ExpandableInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
+	if !tc.Expanded {
+		tc.Expanded = true
+		for _, ins := range e.GetExpandInstructions() {
+			ins.Execute(gc, tc)
+		}
+	}
+}
+
 func (e *AtomicAssignmentFromTemp) Execute(gc *GlobalContext, tc *ThreadContext) {
-	gc.values[(e.expr.Evaluate(gc, tc)).(string)] =
+	gc.values[fmt.Sprint(e.expr.GetName())] =
 		GlobalStateType{value: tc.TempVariable, name: e.expr.GetName()}
+	moveToNextInstruction(tc)
 }
 
 func (e *AtomicAssignmentToTemp) Execute(gc *GlobalContext, tc *ThreadContext) {
@@ -174,7 +200,7 @@ func (i *IfInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 	if (i.exp.Evaluate(gc, tc)).(bool) {
 		moveToNextInstruction(tc)
 	} else {
-		matchingEndIf := findMatchingInsIndex(tc, i.GetName(), reflect.TypeOf(EndIfInstruction{}))
+		matchingEndIf := findMatchingInsIndex(tc, i.GetName(), reflect.TypeOf(&EndIfInstruction{}))
 		goToInstruction(tc, matchingEndIf)
 	}
 }
@@ -187,10 +213,12 @@ func goToInstruction(context *ThreadContext, num int) {
 func findMatchingInsIndex(context *ThreadContext, name string, tp reflect.Type) int {
 	for i, ins := range context.Instructions {
 		if reflect.TypeOf(ins) == tp && ins.GetName() == name {
+			fmt.Println(reflect.TypeOf(ins), tp)
 			return i
+			//fmt.Println(i)
 		}
 	}
-	panic("挂了吧")
+	panic("没找到对应的结束语句, 挂了吧")
 	return -1
 }
 

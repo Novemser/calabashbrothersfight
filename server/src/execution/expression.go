@@ -47,6 +47,7 @@ type EqualityExpression struct {
 func NewVariableExpression(name string) *VariableExpression {
 	base := baseExpression{
 		Code: name,
+		Name: name,
 	}
 	return &VariableExpression{base}
 }
