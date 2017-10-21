@@ -6,6 +6,7 @@ import (
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
+	"strconv"
 )
 
 var gameState = new(GameState)
@@ -172,15 +173,26 @@ var p = []Program{
 
 var levelInfo = LevelInfo{Title: "a", Description: "d", Programs: p}
 
+func loadLevel(id int, err error) {
+	if err == nil {
+		//正确解析
+	}else{
+		// 不是数字
+	}
+}
 func main() {
 	app := iris.New()
 	app.Use(recover.New())
 	app.Use(logger.New())
 
+	// 加载关卡
 	app.Get("/api/level/{id}", func(ctx iris.Context) {
-		//movies[0].Name = ctx.Params().Get("id")
+		levelIdStr := ctx.Params().Get("id")
+		levelId, err := strconv.Atoi(levelIdStr)
+		loadLevel(levelId, err)
 		ctx.JSON(levelInfo)
 	})
+
 	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
 
 }
