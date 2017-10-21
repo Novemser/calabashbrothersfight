@@ -3,6 +3,7 @@ package execution
 type GlobalContext struct {
 	Values map[string]GlobalStateType
 	LockMsg string
+	IsPanic bool
 }
 
 type Pair struct {
@@ -18,6 +19,8 @@ func NewGlobalContext(args...Pair) *GlobalContext {
 
 	return &GlobalContext{
 		Values: mapCtx,
+		LockMsg:"",
+		IsPanic:false,
 	}
 }
 
