@@ -1,5 +1,5 @@
 package execution
 
 type GlobalContext struct {
-	values map[string]string
+	values map[string]GlobalStateType
 }

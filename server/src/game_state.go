@@ -3,7 +3,7 @@ package main
 import "execution"
 
 type GameState struct {
-	threadState int
+	threadStates []ThreadState
 	level       Level
 	globalState int
 }
