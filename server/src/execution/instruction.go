@@ -76,6 +76,7 @@ type EndIfInstruction struct {
 
 type ExpandableInstruction struct {
 	baseInstruction
+	expandIns []Instruction
 }
 
 type AtomicAssignmentToTemp struct {
@@ -88,58 +89,66 @@ type AtomicAssignmentFromTemp struct {
 	expr Expression
 }
 
-func NewExpandableInstruction(name string, expandIns []Instruction) ExpandableInstruction {
-	return ExpandableInstruction{}
+func NewExpandableInstruction(name string, expandIns []Instruction) *ExpandableInstruction {
+	return &ExpandableInstruction{baseInstruction{
+		Code: name,
+		Name: "Expandable ins",
+	}, expandIns}
 }
 
-func NewAtomicAssignFromTemp(exprLeft Expression) AtomicAssignmentFromTemp {
+func NewAtomicAssignFromTemp(exprLeft Expression) *AtomicAssignmentFromTemp {
 	base := baseInstruction{
-		Code:        InstructionExpr(AssignmentExpr(exprLeft, &NewVariableExpression("temp"))),
+		Code:        InstructionExpr(AssignmentExpr(exprLeft, NewVariableExpression("temp"))),
 		Description: "Atomic assign temp to left expr",
 	}
-	return AtomicAssignmentFromTemp{base, exprLeft}
+	return &AtomicAssignmentFromTemp{base, exprLeft}
 }
 
-func NewAtomicAssignToTemp(exprRight Expression) AtomicAssignmentToTemp {
+func NewAtomicAssignToTemp(exprRight Expression) *AtomicAssignmentToTemp {
 	base := baseInstruction{
-		Code:        InstructionExpr(AssignmentExpr(&NewVariableExpression("temp"), exprRight)),
+		Code:        InstructionExpr(AssignmentExpr(NewVariableExpression("temp"), exprRight)),
 		Description: "Atomic assign right expr to temp",
 	}
-	return AtomicAssignmentToTemp{base, exprRight}
+	return &AtomicAssignmentToTemp{base, exprRight}
 }
 
-func NewAssignmentStatment(varName string, exp Expression) ExpandableInstruction {
+func NewAssignmentStatment(varName string, exp Expression) *ExpandableInstruction {
 	expInsList := []Instruction{
-		&NewAtomicAssignToTemp(exp),
-		&NewAtomicAssignFromTemp(&NewVariableExpression(varName)),
+		NewAtomicAssignToTemp(exp),
+		NewAtomicAssignFromTemp(NewVariableExpression(varName)),
 	}
-	
+
 	expIns := NewExpandableInstruction(
-		AssignmentExpr(&NewVariableExpression(varName), exp), expInsList)
+		AssignmentExpr(NewVariableExpression(varName), exp), expInsList)
 
 	return expIns
 }
 
-func NewStartIfStatment(exp Expression, name string) IfInstruction {
+func NewStartIfStatement(exp Expression, name string) *IfInstruction {
 	base := baseInstruction{
 		Code:        IfStart() + AddBraces(exp) + Then(),
 		Description: "If statement",
 		Name:        name,
 	}
-	return IfInstruction{base, exp}
+	return &IfInstruction{base, exp}
 }
 
-func NewEndIfStatment(name string) EndIfInstruction {
+func NewEndIfStatment(name string) *EndIfInstruction {
 	base := baseInstruction{
 		Code:        End(),
 		Description: "End if statement",
 		Name:        name,
 	}
-	return EndIfInstruction{base}
+	return &EndIfInstruction{base}
+}
+
+func (e *ExpandableInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
+	
+	moveToNextInstruction(tc)
 }
 
 func (e *AtomicAssignmentFromTemp) Execute(gc *GlobalContext, tc *ThreadContext) {
-	gc.values[string(e.expr.Evaluate(gc, tc))] =
+	gc.values[(e.expr.Evaluate(gc, tc)).(string)] =
 		GlobalStateType{value: tc.TempVariable, name: e.expr.GetName()}
 }
 

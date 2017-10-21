@@ -8,3 +8,9 @@ type ThreadContext struct {
 	Expanded          bool
 	TempVariable      interface{} // Temp variable to store value
 }
+
+func NewThreadContext(id, pc, epc int, insList []Instruction) ThreadContext {
+	return ThreadContext{
+		id, pc, epc, insList, false, nil,
+	}
+}
