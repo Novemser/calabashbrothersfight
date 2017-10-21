@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"container/list"
-	//"github.com/kataras/iris"
-	//"github.com/kataras/iris/middleware/logger"
-	//"github.com/kataras/iris/middleware/recover"
-	//"strconv"
+	"github.com/kataras/iris/middleware/recover"
 	c "content"
+	"github.com/kataras/iris"
+	"github.com/kataras/iris/middleware/logger"
+	"strconv"
 )
 
 var gameState = new(c.GameState)
@@ -146,10 +146,11 @@ func IsLevelPristine() bool {
 
 // View Model
 type LevelInfo struct {
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Programs    []Program `json:"programs"`
-	GameStatus  int       `json:"gameStatus"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	Programs    []Program     `json:"programs"`
+	GameStatus  int           `json:"gameStatus"`
+	Context     []ContextType `json:"context"`
 }
 type Program struct {
 	Current          []int   `json:"current"`
@@ -194,8 +195,23 @@ var p = []Program{
 		Code:             cs,
 	},
 }
+var co = []ContextType{
+	{
+		Name:  "flag",
+		Value: "true",
+	},
+	{
+		Name:  "a",
+		Value: "0",
+	},
+}
 
-var levelInfo = LevelInfo{Title: "a", Description: "d", Programs: p, GameStatus: 0}
+type ContextType struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+var levelInfo = LevelInfo{Title: "a", Description: "d", Programs: p, GameStatus: 0, Context: co}
 
 func loadLevel(id int, err error) BackResponse {
 	backResponse := BackResponse{}
@@ -214,18 +230,18 @@ func loadLevel(id int, err error) BackResponse {
 }
 
 func main() {
-	startLevel("L1")
-	//app := iris.New()
-	//app.Use(recover.New())
-	//app.Use(logger.New())
-	//
-	//// 加载关卡
-	//app.Get("/api/level/{id}", func(ctx iris.Context) {
-	//	levelIdStr := ctx.Params().Get("id")
-	//	levelId, err := strconv.Atoi(levelIdStr)
-	//	ctx.JSON(loadLevel(levelId, err))
-	//})
-	//
-	//app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
+	//startLevel("L1")
+	app := iris.New()
+	app.Use(recover.New())
+	app.Use(logger.New())
+
+	// 加载关卡
+	app.Get("/api/level/{id}", func(ctx iris.Context) {
+		levelIdStr := ctx.Params().Get("id")
+		levelId, err := strconv.Atoi(levelIdStr)
+		ctx.JSON(loadLevel(levelId, err))
+	})
+
+	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
 
 }
