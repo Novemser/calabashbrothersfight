@@ -4,8 +4,8 @@ import "execution"
 
 type GameState struct {
 	threadContext []execution.ThreadContext
-	level       Level
-	globalState execution.GlobalContext
+	level         Level
+	globalState   execution.GlobalContext
 }
 
 func (g *GameState) ResetForLevel(level Level) {
