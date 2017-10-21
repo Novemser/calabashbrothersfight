@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"container/list"
 	"github.com/kataras/iris"
-	"github.com/kataras/iris/mvc"
+	"github.com/kataras/iris/middleware/logger"
+	"github.com/kataras/iris/middleware/recover"
+	"strconv"
 )
 
 var gameState = new(GameState)
@@ -141,113 +143,88 @@ func IsLevelPristine() bool {
 	return true
 }
 
-//TODO 删掉的东西
-
-// Movie is our sample data structure.
-type Movie struct {
+// View Model
+type LevelInfo struct {
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Programs    []Program `json:"programs"`
+	GameStatus  int       `json:"gameStatus"`
+}
+type Program struct {
+	Current          []int   `json:"current"`
+	CanStepNext      bool    `json:"canStepNext"`
+	CanCurrentExpand bool    `json:"canCurrentExpand"`
+	Code             []Coder `json:"code"`
+}
+type Coder struct {
 	Name   string `json:"name"`
-	Year   int    `json:"year"`
-	Genre  string `json:"genre"`
-	Poster string `json:"poster"`
+	Code   string `json:"code"`
+	Indent int    `json:"indent"`
+}
+type BackResponse struct {
+	Status int       `json:"status"`
+	Msg    string    `json:"msg"`
+	Data   LevelInfo `json:"data"`
 }
 
-// movies contains our imaginary data source.
-var movies = []Movie{
+var cs = []Coder{
 	{
-		Name:   "Casablanca",
-		Year:   1942,
-		Genre:  "Romance",
-		Poster: "https://iris-go.com/images/examples/mvc-movies/1.jpg",
+		Name:   "na",
+		Code:   "11",
+		Indent: 22,
 	},
 	{
-		Name:   "Gone with the Wind",
-		Year:   1939,
-		Genre:  "Romance",
-		Poster: "https://iris-go.com/images/examples/mvc-movies/2.jpg",
+		Name:   "na",
+		Code:   "11",
+		Indent: 22,
+	},
+}
+var p = []Program{
+	{
+		CanStepNext:      true,
+		Current:          []int{1, 2},
+		CanCurrentExpand: false,
+		Code:             cs,
 	},
 	{
-		Name:   "Citizen Kane",
-		Year:   1941,
-		Genre:  "Mystery",
-		Poster: "https://iris-go.com/images/examples/mvc-movies/3.jpg",
+		CanStepNext:      false,
+		Current:          []int{1, 2},
+		CanCurrentExpand: false,
+		Code:             cs,
 	},
-	{
-		Name:   "The Wizard of Oz",
-		Year:   1939,
-		Genre:  "Fantasy",
-		Poster: "https://iris-go.com/images/examples/mvc-movies/4.jpg",
-	},
+}
+
+var levelInfo = LevelInfo{Title: "a", Description: "d", Programs: p, GameStatus: 0}
+
+func loadLevel(id int, err error) BackResponse {
+	backResponse := BackResponse{}
+	if err == nil {
+		backResponse.Data = levelInfo
+		backResponse.Status = 0
+		backResponse.Msg = "success"
+		//正确解析
+	} else {
+		backResponse.Data = levelInfo
+		backResponse.Status = 1
+		backResponse.Msg = "关卡ID无法识别"
+		// 不是数字
+	}
+	return backResponse
 }
 
 func main() {
 	//startLevel("L1")
 	app := iris.New()
+	app.Use(recover.New())
+	app.Use(logger.New())
 
-	app.Controller("/movies", new(MoviesController))
+	// 加载关卡
+	app.Get("/api/level/{id}", func(ctx iris.Context) {
+		levelIdStr := ctx.Params().Get("id")
+		levelId, err := strconv.Atoi(levelIdStr)
+		ctx.JSON(loadLevel(levelId, err))
+	})
 
-	app.Run(iris.Addr(":8080"))
-}
+	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
 
-// MoviesController is our /movies controller.
-type MoviesController struct {
-	// if you build with go1.8 you have to use the mvc package always,
-	// otherwise
-	// you can, optionally
-	// use the type alias `iris.C`,
-	// same for
-	// context.Context -> iris.Context,
-	// mvc.Result -> iris.Result,
-	// mvc.Response -> iris.Response,
-	// mvc.View -> iris.View
-	mvc.C
-}
-
-// Get returns list of the movies
-// Demo:
-// curl -i http://localhost:8080/movies
-func (c *MoviesController) Get() []Movie {
-	return movies
-}
-
-// GetBy returns a movie
-// Demo:
-// curl -i http://localhost:8080/movies/1
-func (c *MoviesController) GetBy(id int) Movie {
-	return movies[id]
-}
-
-// PutBy updates a movie
-// Demo:
-// curl -i -X PUT -F "genre=Thriller" -F "poster=@/Users/kataras/Downloads/out.gif" http://localhost:8080/movies/1
-func (c *MoviesController) PutBy(id int) Movie {
-	// get the movie
-	m := movies[id]
-
-	// get the request data for poster and genre
-	file, info, err := c.Ctx.FormFile("poster")
-	if err != nil {
-		c.Ctx.StatusCode(iris.StatusInternalServerError)
-		return Movie{}
-	}
-	file.Close()            // we don't need the file
-	poster := info.Filename // imagine that as the url of the uploaded file...
-	genre := c.Ctx.FormValue("genre")
-
-	// update the poster
-	m.Poster = poster
-	m.Genre = genre
-	movies[id] = m
-
-	return m
-}
-
-// DeleteBy deletes a movie
-// Demo:
-// curl -i -X DELETE -u admin:password http://localhost:8080/movies/1
-func (c *MoviesController) DeleteBy(id int) iris.Map {
-	// delete the entry from the movies slice
-	deleted := movies[id].Name
-	movies = append(movies[:id], movies[id+1:]...)
-	// and return the deleted movie's name
-	return iris.Map{"deleted": deleted}
 }
