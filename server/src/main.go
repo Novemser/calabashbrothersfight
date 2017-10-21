@@ -1,19 +1,24 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"container/list"
+)
 
 var gameState = new(GameState)
-var undoHistory = []History{}
+var undoHistory = list.New()
 
 func saveForUndo() {
 	var history = History{gameState.threadContext, gameState.globalState}
-	undoHistory = append(undoHistory, history)
-
+	undoHistory.PushBack(history)
 }
 
 //TODO
 func startLevel(levelName string) {
-	undoHistory = []History{}
+	//清空
+	for e := undoHistory.Front(); e != nil; e = e.Next() {
+		undoHistory.Remove(e)
+	}
 }
 func areAllThreadsBlocked() bool {
 	return false
@@ -62,6 +67,17 @@ func win(winInfo string) {
 func lose(loseInfo string) {
 	fmt.Print(loseInfo)
 }
+
+func expandThread(threadId int) {
+	saveForUndo()
+	gameState.threadContext[threadId].Expanded = true
+}
+//func undo() {
+//	var last = JSON.parse(undoHistory.pop())
+//	gameState.threadState = last.threadState
+//	gameState.globalState = last.globalState
+//}
+
 func stepThread(thread int) {
 	//if IsLevelPristine() {
 	////第一关
