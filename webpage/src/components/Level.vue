@@ -6,7 +6,7 @@
 			<p class="introduction" v-html="description"></p>
 			<div class="source-controls">
 				<mu-raised-button icon="undo" label="撤销" @click="undo()"
-								  primary :disabled="canUndo"></mu-raised-button>
+								  primary :disabled="!canUndo"></mu-raised-button>
 				<mu-raised-button icon="refresh" label="重置" @click="reload()"
 								  secondary></mu-raised-button>
 			</div>
@@ -21,7 +21,7 @@
 					<mu-raised-button icon="play_arrow" label="步进" @click="stepThread(thread)"
 					  	:disabled="!program['canStepNext']"></mu-raised-button>
 					<mu-raised-button icon="zoom_in" label="展开" @click="expand(thread)"
-						:disabled="false"></mu-raised-button>
+						:disabled="!program['canCurrentExpand']"></mu-raised-button>
 				</div>
 				<div class="code">
 					<div v-for="(expression, index) in program['code']">
@@ -33,7 +33,7 @@
 						<div class="instruction" v-if="expression['expanded']" :key="_index"
 							 v-for="(_expression, _index) in expression['expandInstructions']"
 							 :class="{ current: program['current'][1] === _index }" >
-							<span class="indent">{{ _expression['indent'] | showTab }}</span>
+							<span class="indent">{{ expression['indent'] + 1 | showTab }}</span>
 							<span class="block" :title="_expression['description']"
 								  v-html="highlight(_expression['code'], _expression['name'])"></span>
 						</div>
@@ -68,24 +68,43 @@
 				programs: [],
 				context: [],
 				gameStatus: 0,
-				canUndo: false
+				canUndo: false,
+				_tippy: null
 			}
 		},
 		methods: {
-			fetchData (url) {
+			fetchData (url, cb = function () {}) {
 				this.loading = true
 				this.axios.get(url).then((response) => {
 					this.loading = false
 					if (response && response.data) {
 						const data = response.data
 						if (data.status === 0) {
-							this.load(data.data)
+							this.load(this.setIndent(data.data), cb)
 						} else {
 							this.openDialog('错误', data.msg)
 							console.error(data.msg)
 						}
 					}
 				}).catch(console.error.bind(this))
+			},
+			setIndent (data) {
+				const programs = data.programs
+				for (let p = 0; p < programs.length; p++) {
+					const program = programs[p]['code']
+					let indent = 0
+					for (let i = 0; i < program.length; i++) {
+						const code = program[i]
+						code.indent = indent
+						if (['If statement', 'For statement'].indexOf(code.description) !== -1) {
+							indent++
+						} else if (['End if statement', 'End of for'].indexOf(code.description) !== -1) {
+							indent--
+							code.indent = indent
+						}
+					}
+				}
+				return data
 			},
 			mock () {
 				return {
@@ -223,13 +242,14 @@
 					gameStatus: 0
 				}
 			},
-			load (data) {
+			load (data, cb) {
 				this.title = data.title
 				this.description = data.description
 				this.programs = data.programs
 				this.context = data.context
 				this.gameStatus = data.gameStatus
 				this.canUndo = data.canUndo
+				cb && cb()
 			},
 			/**
 			 * 步进下一条指令
@@ -251,7 +271,22 @@
 				this.fetchData(`/api/undo/${this.level}`)
 			},
 			reload: function () {
-				this.fetchData(`/api/level/${this.level}`)
+				this.fetchData(`/api/level/${this.level}`, () => {
+					this._tippy && this._tippy.destroyAll()
+					/**
+					 * hover效果
+					 * 包需要在文档加载完毕之后执行
+					 */
+					setTimeout(() => {
+						this._tippy = tippy('.block', {
+							position: 'left',
+							animation: 'shift',
+							duration: 300,
+							interactive: true,
+							arrow: true
+						})
+					}, 100)
+				})
 			},
 			highlight: function (code, name) {
 				const rule = hightlightRules[name]
@@ -260,6 +295,10 @@
 			}
 		},
 		watch: {
+			'$route': function () {
+				this.level = this.$route.params.level
+				this.reload()
+			},
 			'gameStatus': function () {
 				switch (this.gameStatus) {
 				case -1:
@@ -277,23 +316,10 @@
 			this.level = this.$route.params.level
 			this.reload()
 //			this.load(this.mock())
-			/**
-			 * hover效果
-			 * 包需要在文档加载完毕之后执行
-			 */
-			window.onload = function () {
-				tippy('.block', {
-					position: 'left',
-					animation: 'shift',
-					duration: 300,
-					interactive: true,
-					arrow: true
-				})
-			}
 		},
 		filters: {
 			showTab: function (quantity) {
-				return new Array(quantity).fill(' ').join('')
+				return new Array(quantity).fill('  ').join('')
 			}
 		}
 	}

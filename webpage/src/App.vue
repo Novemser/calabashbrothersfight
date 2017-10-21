@@ -96,11 +96,12 @@
 				&:last-child
 					margin-right 0
 				.thread-header
-					font-size 18px
+					font-size 20px
 			.code
 				margin 32px 0 16px
 				.instruction
 					font-family "Fira Code"
+					font-size 16px
 					.indent
 						white-space pre
 					&.current
