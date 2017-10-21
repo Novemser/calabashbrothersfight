@@ -10,7 +10,7 @@ func TestNewThread(t *testing.T) {
 		"a",
 		GlobalStateType{Value:0, Name:"a"},
 	})
-	//gc.values["a"] = GlobalStateType{Value: 0, Name: "a"}
+	//gc.Values["a"] = GlobalStateType{Value: 0, Name: "a"}
 	/**
 	a = 0;
 	if (a == 3) {
@@ -31,7 +31,7 @@ func TestNewThread(t *testing.T) {
 		ins.Execute(gc, context)
 		i = context.ProgramCounter
 	}
-	fmt.Println(gc.values["a"])
+	fmt.Println(gc.Values["a"])
 }
 
 func TestLevel(t *testing.T) {

@@ -84,7 +84,7 @@ func (e *LiteralExpression) Evaluate(gc *GlobalContext, tc *ThreadContext) inter
 }
 
 func (e *VariableExpression) Evaluate(gc *GlobalContext, tc *ThreadContext) interface{} {
-	return gc.values[e.Name].Value
+	return gc.Values[e.Name].Value
 }
 
 func (e *AdditionExpression) Evaluate(gc *GlobalContext, tc *ThreadContext) interface{} {

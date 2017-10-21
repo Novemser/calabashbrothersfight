@@ -30,11 +30,11 @@
 		},
 		methods: {
 			onEditorMounted (editor) {
-				this.editor = editor
+				this.editor = Editor
 			},
 			onCodeChange (editor) {
 //				console.log(editor.getValue())
-				this.ws.send(editor.getValue())
+				this.ws.send(Editor.getValue())
 			}
 		},
 		mounted: function () {

@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"container/list"
-	//"github.com/kataras/iris"
-	//"github.com/kataras/iris/middleware/logger"
-	//"github.com/kataras/iris/middleware/recover"
-	//"strconv"
+	"github.com/kataras/iris/middleware/recover"
 	c "content"
+	"github.com/kataras/iris"
+	"github.com/kataras/iris/middleware/logger"
+	"strconv"
 )
 
 var gameState = new(c.GameState)
@@ -19,7 +19,7 @@ func saveForUndo() {
 }
 
 //TODO
-func startLevel(levelName string) {
+func startLevel(levelId int) {
 	//清空
 	for e := undoHistory.Front(); e != nil; e = e.Next() {
 		undoHistory.Remove(e)
@@ -31,9 +31,9 @@ func startLevel(levelName string) {
 	gameState.ThreadContexts = level.ThreadContexts
 	gameState.Level = *level
 
-	for i := 0; i < len(level.ThreadContexts[0].Instructions); i++ {
-		stepThread(0)
-	}
+	//for i := 0; i < len(level.ThreadContexts[0].Instructions); i++ {
+	//	stepThread(0)
+	//}
 }
 
 func areAllThreadsBlocked() bool {
@@ -126,8 +126,8 @@ func stepThread(thread int) {
 		checkForVictoryConditions()
 
 	}
-	fmt.Println(program, threadState, pc)
-
+	//fmt.Println(program, threadState, pc)
+	fmt.Println(gameState.GlobalState)
 }
 
 func IsThreadFinished(threadId int) bool {
@@ -146,10 +146,11 @@ func IsLevelPristine() bool {
 
 // View Model
 type LevelInfo struct {
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Programs    []Program `json:"programs"`
-	GameStatus  int       `json:"gameStatus"`
+	Title       string        `json:"title"`
+	Description string        `json:"description"`
+	Programs    []Program     `json:"programs"`
+	GameStatus  int           `json:"gameStatus"`
+	Context     []ContextType `json:"context"`
 }
 type Program struct {
 	Current          []int   `json:"current"`
@@ -158,9 +159,10 @@ type Program struct {
 	Code             []Coder `json:"code"`
 }
 type Coder struct {
-	Name   string `json:"name"`
-	Code   string `json:"code"`
-	Indent int    `json:"indent"`
+	Name        string `json:"name"`
+	Code        string `json:"code"`
+	Indent      int    `json:"indent"`
+	Description string `json:"description"`
 }
 type BackResponse struct {
 	Status int       `json:"status"`
@@ -180,32 +182,81 @@ var cs = []Coder{
 		Indent: 22,
 	},
 }
-var p = []Program{
-	{
-		CanStepNext:      true,
-		Current:          []int{1, 2},
-		CanCurrentExpand: false,
-		Code:             cs,
-	},
-	{
-		CanStepNext:      false,
-		Current:          []int{1, 2},
-		CanCurrentExpand: false,
-		Code:             cs,
-	},
+//var p = []Program{
+//	{
+//		CanStepNext:      true,
+//		Current:          []int{1, 2},
+//		CanCurrentExpand: false,
+//		Code:             cs,
+//	},
+//	{
+//		CanStepNext:      false,
+//		Current:          []int{1, 2},
+//		CanCurrentExpand: false,
+//		Code:             cs,
+//	},
+//}
+//var co = []ContextType{
+//	{
+//		Name:  "flag",
+//		Value: "true",
+//	},
+//	{
+//		Name:  "a",
+//		Value: "0",
+//	},
+//}
+
+type ContextType struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
-var levelInfo = LevelInfo{Title: "a", Description: "d", Programs: p, GameStatus: 0}
+//var levelInfo = LevelInfo{Title: "a", Description: "d", Programs: p, GameStatus: 0, Context: co}
 
+func packageData() LevelInfo {
+
+	levelInfo := LevelInfo{}
+	levelInfo.Title = gameState.Level.Title
+	levelInfo.Description = gameState.Level.Description
+	levelInfo.GameStatus = 0
+	for _, pro := range gameState.ThreadContexts {
+		p := Program{}
+
+		for _, co := range pro.Instructions {
+			coder := Coder{}
+			coder.Code = co.GetCode()
+			coder.Name = co.GetName()
+			coder.Description = co.GetDescription()
+			coder.Indent = 0
+			p.Code = append(p.Code, coder)
+		}
+
+		p.CanCurrentExpand = pro.Expanded
+		p.CanStepNext = IsThreadFinished(pro.Id)
+		p.Current = []int{pro.ProgramCounter, pro.ExpProgramCounter}
+
+		levelInfo.Programs = append(levelInfo.Programs, p)
+	}
+
+	for _, v := range gameState.GlobalState.Values {
+		ctx := ContextType{}
+		ctx.Name = v.Name
+		ctx.Value = fmt.Sprint(v.Value)
+		levelInfo.Context = append(levelInfo.Context, ctx)
+	}
+	//IsThreadFinished
+	return levelInfo
+}
 func loadLevel(id int, err error) BackResponse {
 	backResponse := BackResponse{}
 	if err == nil {
-		backResponse.Data = levelInfo
+		backResponse.Data = packageData()
 		backResponse.Status = 0
 		backResponse.Msg = "success"
 		//正确解析
 	} else {
-		backResponse.Data = levelInfo
+		backResponse.Data = packageData()
 		backResponse.Status = 1
 		backResponse.Msg = "关卡ID无法识别"
 		// 不是数字
@@ -214,18 +265,38 @@ func loadLevel(id int, err error) BackResponse {
 }
 
 func main() {
-	startLevel("L1")
-	//app := iris.New()
-	//app.Use(recover.New())
-	//app.Use(logger.New())
-	//
-	//// 加载关卡
-	//app.Get("/api/level/{id}", func(ctx iris.Context) {
-	//	levelIdStr := ctx.Params().Get("id")
-	//	levelId, err := strconv.Atoi(levelIdStr)
-	//	ctx.JSON(loadLevel(levelId, err))
-	//})
-	//
-	//app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
+
+	//var levelIdMock = 1
+
+	//startLevel(levelIdMock)
+	//:level/:thread/:currentLine/:currentSubLine
+	//:level/:thread/:currentLine/:currentSubLine
+	//stepThread(0)
+	//:level/:thread/:currentLine/:currentSubLine
+	//stepThread(0)
+	//:level/:thread/:currentLine/:currentSubLine
+	//stepThread(0)
+
+	app := iris.New()
+	app.Use(recover.New())
+	app.Use(logger.New())
+
+	// 加载关卡
+	app.Get("/api/level/{id}", func(ctx iris.Context) {
+		levelIdStr := ctx.Params().Get("id")
+		levelId, err := strconv.Atoi(levelIdStr)
+		ctx.JSON(loadLevel(levelId, err))
+	})
+	// 步进展开代码
+	app.Get("/api/stepExpandedThread/{level}/{thread}/{currentLine}/{currentSubLine}", func(ctx iris.Context) {
+		thread := ctx.Params().Get("thread")
+		levelIdStr := ctx.Params().Get("id")
+		levelId, err := strconv.Atoi(levelIdStr)
+		threadId, err := strconv.Atoi(thread)
+		stepThread(threadId)
+		ctx.JSON(loadLevel(levelId, err))
+	})
+
+	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
 
 }

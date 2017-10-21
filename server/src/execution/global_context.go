@@ -1,7 +1,7 @@
 package execution
 
 type GlobalContext struct {
-	values map[string]GlobalStateType
+	Values map[string]GlobalStateType
 }
 
 type Pair struct {
@@ -16,7 +16,7 @@ func NewGlobalContext(args...Pair) *GlobalContext {
 	}
 
 	return &GlobalContext{
-		values: mapCtx,
+		Values: mapCtx,
 	}
 }
 
