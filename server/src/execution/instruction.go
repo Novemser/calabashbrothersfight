@@ -89,6 +89,22 @@ type AtomicAssignmentFromTemp struct {
 	expr Expression
 }
 
+// If more than one thread entered critical section,
+// The player win
+type CriticalSectionExpression struct {
+	baseInstruction
+}
+
+func NewCriticalSectionExpression() *CriticalSectionExpression {
+	return &CriticalSectionExpression{
+		baseInstruction{
+			Code:InstructionExpr("criticalSection()"),
+			Name:"Critical section",
+			Description:"Critical section",
+		},
+	}
+}
+
 func NewExpandableInstruction(name string, expandIns []Instruction) *ExpandableInstruction {
 	return &ExpandableInstruction{baseInstruction{
 		Code:               name,
@@ -134,13 +150,17 @@ func NewStartIfStatement(exp Expression, name string) *IfInstruction {
 	return &IfInstruction{base, exp}
 }
 
-func NewEndIfStatment(name string) *EndIfInstruction {
+func NewEndIfStatement(name string) *EndIfInstruction {
 	base := baseInstruction{
 		Code:        End(),
 		Description: "End if statement",
 		Name:        name,
 	}
 	return &EndIfInstruction{base}
+}
+
+func (e *CriticalSectionExpression) Execute(gc *GlobalContext, tc *ThreadContext) {
+	moveToNextInstruction(tc)
 }
 
 func (e *ExpandableInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {

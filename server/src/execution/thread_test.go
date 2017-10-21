@@ -20,7 +20,7 @@ func TestNewThread(t *testing.T) {
 	ifUp := NewStartIfStatement(
 		NewEqualityExpression(NewVariableExpression("a"), NewLiteralExpression(3)),
 			"if1")
-	ifEnd := NewEndIfStatment("if1")
+	ifEnd := NewEndIfStatement("if1")
 
 	context := NewThreadContext(0, 0, 0, []Instruction{assign, ifUp, assignIn, ifEnd})
 	for i := 0; i < 3; {
