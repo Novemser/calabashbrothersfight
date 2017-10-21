@@ -1,8 +1,17 @@
 <template>
 	<div class="section">
+		<mu-linear-progress v-show="loading" ></mu-linear-progress>
 		<h1 class="title">{{ title }}</h1>
-		<p class="introduction" v-html="description"></p>
-		<h2 class="subtitle">代码</h2>
+		<div class="panel">
+			<p class="introduction" v-html="description"></p>
+			<div class="source-controls">
+				<mu-raised-button icon="undo" label="撤销" @click="undo()"
+								  primary :disabled="canUndo"></mu-raised-button>
+				<mu-raised-button icon="refresh" label="重置" @click="reload()"
+								  secondary></mu-raised-button>
+			</div>
+		</div>
+		<h2 class="subtitle" title="thread">代码</h2>
 		<div class="source">
 			<div v-for="(program, thread) in programs" class="thread" :key="thread">
 				<h3 class="thread-header">
@@ -12,19 +21,21 @@
 					<mu-raised-button icon="play_arrow" label="步进" @click="stepThread(thread)"
 					  	:disabled="!program['canStepNext']"></mu-raised-button>
 					<mu-raised-button icon="zoom_in" label="展开" @click="expand(thread)"
-						:disabled="!program['canCurrentExpand']"></mu-raised-button>
+						:disabled="false"></mu-raised-button>
 				</div>
 				<div class="code">
 					<div v-for="(expression, index) in program['code']">
 						<div class="instruction" :class="{ current: program['current'][0] === index }" :key="index">
 							<span class="indent">{{ expression['indent'] | showTab }}</span>
-							<span class="block" v-html="highlight(expression['code'], expression['name'])"></span>
+							<span class="block" :title="expression['description']"
+								  v-html="highlight(expression['code'], expression['name'])"></span>
 						</div>
 						<div class="instruction" v-if="expression['expanded']" :key="_index"
 							 v-for="(_expression, _index) in expression['expandInstructions']"
 							 :class="{ current: program['current'][1] === _index }" >
 							<span class="indent">{{ _expression['indent'] | showTab }}</span>
-							<span class="block" v-html="highlight(_expression['code'], _expression['name'])"></span>
+							<span class="block" :title="_expression['description']"
+								  v-html="highlight(_expression['code'], _expression['name'])"></span>
 						</div>
 					</div>
 				</div>
@@ -42,34 +53,41 @@
 </template>
 
 <script>
+	import 'tippy.js/dist/tippy.css'
+	import tippy from 'tippy.js/dist/tippy.min'
 	import hightlightRules from '../assets/highlight-rule'
 	export default {
 		name: 'beginning',
 		props: {},
 		data () {
 			return {
+				loading: false,
+				level: 0,
 				title: '',
 				description: '',
 				programs: [],
 				context: [],
-				gameStatus: 0
+				gameStatus: 0,
+				canUndo: false
 			}
 		},
 		methods: {
-			fetchData (level) {
-				this.axios.get(`/api/level/${level}`).then((response) => {
+			fetchData (url) {
+				this.loading = true
+				this.axios.get(url).then((response) => {
+					this.loading = false
 					if (response && response.data) {
 						const data = response.data
 						if (data.status === 0) {
 							this.load(data.data)
 						} else {
 							this.openDialog('错误', data.msg)
+							console.error(data.msg)
 						}
 					}
 				}).catch(console.error.bind(this))
 			},
-			mock (level) {
-				console.log(`level => ${level}`)
+			mock () {
 				return {
 					title: '教程 1: 接口',
 					description: `
@@ -202,7 +220,7 @@
 							value: 0
 						}
 					],
-					gameStatus: -1
+					gameStatus: 0
 				}
 			},
 			load (data) {
@@ -211,24 +229,29 @@
 				this.programs = data.programs
 				this.context = data.context
 				this.gameStatus = data.gameStatus
+				this.canUndo = data.canUndo
 			},
+			/**
+			 * 步进下一条指令
+			 * @param thread 协程索引$index
+			 */
 			stepThread (thread) {
-				const currentIndex = this.programs[thread]['current'][0]
-
-				this.$set(this.programs[thread]['current'], 1, 0)
-				if (currentIndex < this.programs[thread]['code'].length) {
-					this.$set(this.programs[thread]['current'], 0, currentIndex + 1)
-				}
-				this.$set(this.disabledControls[thread], 1, !this.programs[thread]['code'][currentIndex + 1].expandable)
+				const currentLine = this.programs[thread]['current'][0]
+				this.fetchData(`/api/stepthread/${this.level}/${thread}/${currentLine}`)
 			},
 			/**
 			 * 展开一条指令
 			 * @param thread 协程索引$index
 			 */
 			expand: function (thread) {
-				const currentIndex = this.programs[thread]['current'][0]
-				const program = this.programs[thread]['code']
-				this.$set(program[currentIndex], 'expanded', true)
+				const currentLine = this.programs[thread]['current'][0]
+				this.fetchData(`/api/expand/${this.level}/${thread}/${currentLine}`)
+			},
+			undo: function () {
+				this.fetchData(`/api/undo/${this.level}`)
+			},
+			reload: function () {
+				this.fetchData(`/api/level/${this.level}`)
 			},
 			highlight: function (code, name) {
 				const rule = hightlightRules[name]
@@ -251,8 +274,22 @@
 			}
 		},
 		mounted: function () {
-			const level = this.$route.params.level
-			this.fetchData(level)
+			this.level = this.$route.params.level
+			this.reload()
+//			this.load(this.mock())
+			/**
+			 * hover效果
+			 * 包需要在文档加载完毕之后执行
+			 */
+			window.onload = function () {
+				tippy('.block', {
+					position: 'left',
+					animation: 'shift',
+					duration: 300,
+					interactive: true,
+					arrow: true
+				})
+			}
 		},
 		filters: {
 			showTab: function (quantity) {
