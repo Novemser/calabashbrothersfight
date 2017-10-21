@@ -18,7 +18,7 @@ func GetLevel(id int) *Level {
 		return &Level{
 			"初级教程1",
 			"你渴望力量吗",
-			"这是一个能模拟多线程并发执行的在线教程～",
+			"这是一个能模拟多线程并发执行的在线教程，在我们的故事中，变身葫芦娃，拒绝平庸，挑战极限。相信你一定能通过考验。",
 			[]*e.ThreadContext{
 				e.DefaultThreadContext(
 					0, &[]e.Instruction{
@@ -48,7 +48,7 @@ func GetLevel(id int) *Level {
 		return &Level{
 			"初级教程2",
 			"魔鬼般的赋值语句",
-			"欢迎来到葫芦娃的王国。在这里,7只英勇的葫芦娃将与诡计多端的白骨精展开一场计算机科学的较量……",
+			"欢迎来到葫芦娃的王国。在这里,7只英勇的葫芦娃将与诡计多端的白骨精展开一场计算机科学的较量。并且，似乎还隐藏着更多的恶势力……",
 			[]*e.ThreadContext{
 				e.DefaultThreadContext(
 					0, &[]e.Instruction{
