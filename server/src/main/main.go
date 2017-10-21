@@ -9,6 +9,7 @@ import (
 	"github.com/kataras/iris/middleware/logger"
 	"strconv"
 	"execution"
+	"reflect"
 )
 
 var gameState = new(c.GameState)
@@ -27,7 +28,7 @@ func startLevel(levelId int) {
 	}
 	gameState = new(c.GameState)
 	// 开始
-	var level = c.GetLevel(1)
+	var level = c.GetLevel(levelId)
 	gameState.GlobalState = level.GlobalContext
 	gameState.ThreadContexts = level.ThreadContexts
 	gameState.Level = *level
@@ -42,7 +43,11 @@ func areAllThreadsBlocked() bool {
 }
 
 func areAllThreadsFinished() bool {
-	return false
+	finished := true
+	for _, ctx := range gameState.ThreadContexts {
+		finished = finished && IsThreadFinished(ctx.Id)
+	}
+	return finished
 }
 
 func checkForVictoryConditions() {
@@ -58,11 +63,11 @@ func checkForVictoryConditions() {
 		var threadState = gameState.ThreadContexts[threadId]
 		var programCounter = threadState.ProgramCounter
 		var currentInstruction = instructions[programCounter]
-		fmt.Print(currentInstruction)
+		fmt.Print("CurIns:", currentInstruction, ";Reflect:", reflect.TypeOf(currentInstruction))
 		//TODO
-		//if currentInstruction.isCriticalSection {
-		//	howManyCriticalSections++
-		//}
+		if reflect.TypeOf(currentInstruction) == reflect.TypeOf(&execution.CriticalSectionExpression{}) {
+			howManyCriticalSections++
+		}
 
 		fmt.Println(t)
 	}
