@@ -30,7 +30,11 @@
 						link: '/'
 					},
 					{
-						name: '教程1 - 接口',
+						name: '你渴望力量吗',
+						link: '/level/0'
+					},
+					{
+						name: '魔鬼般的赋值语句',
 						link: '/level/1'
 					}
 				]
