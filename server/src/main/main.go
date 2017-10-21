@@ -151,7 +151,17 @@ type LevelInfo struct {
 	Programs    []Program     `json:"programs"`
 	GameStatus  int           `json:"gameStatus"`
 	Context     []ContextType `json:"context"`
+	CanUndo     bool          `json:"canUndo"`
 }
+
+func checkCanUndo() bool {
+	if undoHistory.Len() > 0 {
+		return true
+	} else {
+		return false
+	}
+}
+
 type Program struct {
 	Current          []int   `json:"current"`
 	CanStepNext      bool    `json:"canStepNext"`
@@ -170,54 +180,16 @@ type BackResponse struct {
 	Data   LevelInfo `json:"data"`
 }
 
-var cs = []Coder{
-	{
-		Name:   "na",
-		Code:   "11",
-		Indent: 22,
-	},
-	{
-		Name:   "na",
-		Code:   "11",
-		Indent: 22,
-	},
-}
-//var p = []Program{
-//	{
-//		CanStepNext:      true,
-//		Current:          []int{1, 2},
-//		CanCurrentExpand: false,
-//		Code:             cs,
-//	},
-//	{
-//		CanStepNext:      false,
-//		Current:          []int{1, 2},
-//		CanCurrentExpand: false,
-//		Code:             cs,
-//	},
-//}
-//var co = []ContextType{
-//	{
-//		Name:  "flag",
-//		Value: "true",
-//	},
-//	{
-//		Name:  "a",
-//		Value: "0",
-//	},
-//}
-
 type ContextType struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
 }
 
-//var levelInfo = LevelInfo{Title: "a", Description: "d", Programs: p, GameStatus: 0, Context: co}
-
 func packageData() LevelInfo {
 
 	levelInfo := LevelInfo{}
 	levelInfo.Title = gameState.Level.Title
+	levelInfo.CanUndo = checkCanUndo()
 	levelInfo.Description = gameState.Level.Description
 	levelInfo.GameStatus = 0
 	for _, pro := range gameState.ThreadContexts {
@@ -233,7 +205,7 @@ func packageData() LevelInfo {
 		}
 
 		p.CanCurrentExpand = pro.Expanded
-		p.CanStepNext = IsThreadFinished(pro.Id)
+		p.CanStepNext = !IsThreadFinished(pro.Id)
 		p.Current = []int{pro.ProgramCounter, pro.ExpProgramCounter}
 
 		levelInfo.Programs = append(levelInfo.Programs, p)
@@ -266,17 +238,6 @@ func loadLevel(id int, err error) BackResponse {
 
 func main() {
 
-	//var levelIdMock = 1
-
-	//startLevel(levelIdMock)
-	//:level/:thread/:currentLine/:currentSubLine
-	//:level/:thread/:currentLine/:currentSubLine
-	//stepThread(0)
-	//:level/:thread/:currentLine/:currentSubLine
-	//stepThread(0)
-	//:level/:thread/:currentLine/:currentSubLine
-	//stepThread(0)
-
 	app := iris.New()
 	app.Use(recover.New())
 	app.Use(logger.New())
@@ -285,18 +246,47 @@ func main() {
 	app.Get("/api/level/{id}", func(ctx iris.Context) {
 		levelIdStr := ctx.Params().Get("id")
 		levelId, err := strconv.Atoi(levelIdStr)
+		startLevel(levelId)
+
 		ctx.JSON(loadLevel(levelId, err))
 	})
-	// 步进展开代码
-	app.Get("/api/stepExpandedThread/{level}/{thread}/{currentLine}/{currentSubLine}", func(ctx iris.Context) {
+	// 步进代码
+	app.Get("/api/stepthread/{level}/{thread}/{currentLine}", func(ctx iris.Context) {
 		thread := ctx.Params().Get("thread")
-		levelIdStr := ctx.Params().Get("id")
+		levelIdStr := ctx.Params().Get("level")
 		levelId, err := strconv.Atoi(levelIdStr)
 		threadId, err := strconv.Atoi(thread)
 		stepThread(threadId)
 		ctx.JSON(loadLevel(levelId, err))
 	})
 
+	//展开代码
+	app.Get("/api/expand/{level}/{thread}/{currentLine}", func(ctx iris.Context) {
+		thread := ctx.Params().Get("thread")
+		levelIdStr := ctx.Params().Get("level")
+		levelId, err := strconv.Atoi(levelIdStr)
+		threadId, err := strconv.Atoi(thread)
+		expandThread(threadId)
+		ctx.JSON(loadLevel(levelId, err))
+	})
+
+	//步进展开代码
+	app.Get("/api/stepExpandedThread/{level}/{thread}/{currentLine}/{currentSubLine}", func(ctx iris.Context) {
+		thread := ctx.Params().Get("thread")
+		levelIdStr := ctx.Params().Get("level")
+		levelId, err := strconv.Atoi(levelIdStr)
+		threadId, err := strconv.Atoi(thread)
+		expandThread(threadId)
+		ctx.JSON(loadLevel(levelId, err))
+	})
+
+	//撤销
+	app.Get("/api/undo/{level}", func(ctx iris.Context) {
+		levelIdStr := ctx.Params().Get("level")
+		levelId, err := strconv.Atoi(levelIdStr)
+		undo()
+		ctx.JSON(loadLevel(levelId, err))
+	})
 	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
 
 }
