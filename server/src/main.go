@@ -132,53 +132,41 @@ type LevelInfo struct {
 	Programs    []Program `json:"programs"`
 }
 type Program struct {
-	CanStepNext bool  `json:"canStepNext"`
-	Current     []int `json:"current"`
+	Current          []int   `json:"current"`
+	CanStepNext      bool    `json:"canStepNext"`
+	CanCurrentExpand bool    `json:"canCurrentExpand"`
+	Code             []Coder `json:"code"`
 }
-
-// Movie is our sample data structure.
-type Movie struct {
+type Coder struct {
 	Name   string `json:"name"`
-	Year   int    `json:"year"`
-	Genre  string `json:"genre"`
-	Poster string `json:"poster"`
+	Code   string `json:"code"`
+	Indent int    `json:"indent"`
 }
 
-// movies contains our imaginary data source.
-var movies = []Movie{
+var cs = []Coder{
 	{
-		Name:   "Casablanca",
-		Year:   1942,
-		Genre:  "Romance",
-		Poster: "https://iris-go.com/images/examples/mvc-movies/1.jpg",
+		Name:   "na",
+		Code:   "11",
+		Indent: 22,
 	},
 	{
-		Name:   "Gone with the Wind",
-		Year:   1939,
-		Genre:  "Romance",
-		Poster: "https://iris-go.com/images/examples/mvc-movies/2.jpg",
-	},
-	{
-		Name:   "Citizen Kane",
-		Year:   1941,
-		Genre:  "Mystery",
-		Poster: "https://iris-go.com/images/examples/mvc-movies/3.jpg",
-	},
-	{
-		Name:   "The Wizard of Oz",
-		Year:   1939,
-		Genre:  "Fantasy",
-		Poster: "https://iris-go.com/images/examples/mvc-movies/4.jpg",
+		Name:   "na",
+		Code:   "11",
+		Indent: 22,
 	},
 }
 var p = []Program{
 	{
-		CanStepNext: true,
-		Current:     []int{1, 2},
+		CanStepNext:      true,
+		Current:          []int{1, 2},
+		CanCurrentExpand: false,
+		Code:             cs,
 	},
 	{
-		CanStepNext: false,
-		Current:     []int{1, 2},
+		CanStepNext:      false,
+		Current:          []int{1, 2},
+		CanCurrentExpand: false,
+		Code:             cs,
 	},
 }
 
