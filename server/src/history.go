@@ -1,7 +1,8 @@
 package main
 
-type History struct {
-	threadState []ThreadState
-	gameState   GameState
-}
+import "execution"
 
+type History struct {
+	threadState   []ThreadState
+	globalContext execution.GlobalContext
+}

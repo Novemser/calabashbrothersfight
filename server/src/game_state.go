@@ -5,7 +5,7 @@ import "execution"
 type GameState struct {
 	threadStates []ThreadState
 	level       Level
-	globalState int
+	globalState execution.GlobalContext
 }
 
 func (g *GameState) ResetForLevel(level Level) {
