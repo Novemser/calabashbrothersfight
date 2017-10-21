@@ -173,7 +173,7 @@ func (e *ExpandableInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 }
 
 func (e *AtomicAssignmentFromTemp) Execute(gc *GlobalContext, tc *ThreadContext) {
-	gc.values[fmt.Sprint(e.expr.GetName())] =
+	gc.Values[fmt.Sprint(e.expr.GetName())] =
 		GlobalStateType{Value: tc.TempVariable, Name: e.expr.GetName()}
 	moveToNextInstruction(tc)
 }
