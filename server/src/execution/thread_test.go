@@ -18,8 +18,8 @@ func TestNewThread(t *testing.T) {
 	}
 	print(a);
 	 */
-	assign := NewAssignmentStatment("a", NewLiteralExpression(3))
-	assignIn := NewAssignmentStatment("a", NewLiteralExpression(10))
+	assign := NewAssignmentInstruction("a", NewLiteralExpression(3))
+	assignIn := NewAssignmentInstruction("a", NewLiteralExpression(10))
 	ifUp := NewStartIfStatement(
 		NewEqualityExpression(NewVariableExpression("a"), NewLiteralExpression(3)),
 			"if1")
