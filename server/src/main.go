@@ -131,6 +131,7 @@ type LevelInfo struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Programs    []Program `json:"programs"`
+	GameStatus  int       `json:"gameStatus"`
 }
 type Program struct {
 	Current          []int   `json:"current"`
@@ -142,6 +143,11 @@ type Coder struct {
 	Name   string `json:"name"`
 	Code   string `json:"code"`
 	Indent int    `json:"indent"`
+}
+type BackResponse struct {
+	Status int       `json:"status"`
+	Msg    string    `json:"msg"`
+	Data   LevelInfo `json:"data"`
 }
 
 var cs = []Coder{
@@ -171,15 +177,24 @@ var p = []Program{
 	},
 }
 
-var levelInfo = LevelInfo{Title: "a", Description: "d", Programs: p}
+var levelInfo = LevelInfo{Title: "a", Description: "d", Programs: p, GameStatus: 0}
 
-func loadLevel(id int, err error) {
+func loadLevel(id int, err error) BackResponse {
+	backResponse := BackResponse{}
 	if err == nil {
+		backResponse.Data = levelInfo
+		backResponse.Status = 0
+		backResponse.Msg = "success"
 		//正确解析
-	}else{
+	} else {
+		backResponse.Data = levelInfo
+		backResponse.Status = 1
+		backResponse.Msg = "关卡ID无法识别"
 		// 不是数字
 	}
+	return backResponse
 }
+
 func main() {
 	app := iris.New()
 	app.Use(recover.New())
@@ -189,8 +204,7 @@ func main() {
 	app.Get("/api/level/{id}", func(ctx iris.Context) {
 		levelIdStr := ctx.Params().Get("id")
 		levelId, err := strconv.Atoi(levelIdStr)
-		loadLevel(levelId, err)
-		ctx.JSON(levelInfo)
+		ctx.JSON(loadLevel(levelId, err))
 	})
 
 	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
