@@ -5,6 +5,7 @@ type Instruction interface {
 	GetDescription() string
 	GetName() string
 	GetExpandInstructions() []Instruction
+	Execute(gc *GlobalContext, tc *ThreadContext)
 }
 
 type baseInstruction struct {
