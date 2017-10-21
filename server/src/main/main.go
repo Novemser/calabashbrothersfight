@@ -244,7 +244,9 @@ func packageData() LevelInfo {
 			p.Code = append(p.Code, coder)
 		}
 
-		p.CanCurrentExpand = pro.Expanded
+		var temp = (*pro.Instructions)[pro.ProgramCounter]
+
+		p.CanCurrentExpand = temp != nil && len(temp.GetExpandInstructions()) > 0
 		p.CanStepNext = !IsThreadFinished(pro.Id)
 		p.Current = []int{pro.ProgramCounter, pro.ExpProgramCounter}
 

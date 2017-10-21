@@ -14,7 +14,7 @@ for {
 for {
 	critical_section()
 	mutex.Lock()
-	i = i - 1;
+	i = i - 1
 	mutex.Unlock()
  }
 
