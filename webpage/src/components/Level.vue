@@ -1,12 +1,13 @@
 <template>
 	<div class="section">
+		<mu-linear-progress v-show="loading" ></mu-linear-progress>
 		<h1 class="title">{{ title }}</h1>
 		<div class="panel">
 			<p class="introduction" v-html="description"></p>
 			<div class="source-controls">
-				<mu-raised-button icon="play_arrow" label="撤销" @click="undo()"
+				<mu-raised-button icon="undo" label="撤销" @click="undo()"
 								  primary :disabled="canUndo"></mu-raised-button>
-				<mu-raised-button icon="zoom_in" label="重置" @click="reload()"
+				<mu-raised-button icon="refresh" label="重置" @click="reload()"
 								  secondary></mu-raised-button>
 			</div>
 		</div>
@@ -20,7 +21,7 @@
 					<mu-raised-button icon="play_arrow" label="步进" @click="stepThread(thread)"
 					  	:disabled="!program['canStepNext']"></mu-raised-button>
 					<mu-raised-button icon="zoom_in" label="展开" @click="expand(thread)"
-						:disabled="!program['canCurrentExpand']"></mu-raised-button>
+						:disabled="false"></mu-raised-button>
 				</div>
 				<div class="code">
 					<div v-for="(expression, index) in program['code']">
@@ -60,6 +61,7 @@
 		props: {},
 		data () {
 			return {
+				loading: false,
 				level: 0,
 				title: '',
 				description: '',
@@ -71,7 +73,9 @@
 		},
 		methods: {
 			fetchData (url) {
+				this.loading = true
 				this.axios.get(url).then((response) => {
+					this.loading = false
 					if (response && response.data) {
 						const data = response.data
 						if (data.status === 0) {

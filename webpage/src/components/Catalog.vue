@@ -2,13 +2,11 @@
 	<div class="index-page">
 		<p>欢迎来到葫芦娃的王国。</p>
 		<p>在这里,7只英勇的葫芦娃将与诡计多端的白骨精展开一场计算机科学的较量……</p>
-		<p>
-			亲爱的玩家，在这里，您是我们的调度者。<br/>
-			在你面前是一系列的用<span class="high-light">Go</span>语言写的并行程序的若干个<span class="high-light">协程</span>(Goroutines)。<br/>
-			你的目标就是使用任何方式尝试使其运行<span class="high-light">故障</span>。<br/>
-			比如，你让两个协程同时执行到临界区。
-			或者，尝试到达Debug.Assert(false);
-		</p>
+		<p>亲爱的玩家，在这里，您是我们的调度者。</p>
+		<p>在你面前是一系列的用<span class="high-light">Go</span>语言写的并行程序的若干个<span class="high-light">协程</span>(Goroutines)。</p>
+		<p>你的目标就是使用任何方式尝试使其运行<span class="high-light">故障</span>。</p>
+		<p>比如，你让两个协程同时执行到<span class="high-light">临界区</span>。(critical_section)</p>
+		<p>或者，尝试到达Debug.Assert(false);</p>
 	</div>
 </template>
 
