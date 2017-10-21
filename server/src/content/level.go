@@ -93,13 +93,13 @@ func GetLevel(id int) *Level {
 		}
 	case 2:
 		return &Level{
-			"教程3",
-			"",
-			"",
+			"初级教程3",
+			"装甲再厚也能打破",
+			"葫芦兄弟的火娃被蛇精打伤，落单了，这时候蝎子精穿着他的新盔甲要抓他，尽管他的盔甲用上了互斥锁，但是还是有弱点，抓住时机，利用两个线程，一举击败他。",
 			[]*e.ThreadContext{
 				e.DefaultThreadContext(
 					0, &[]e.Instruction{
-						e.NewForStartIns(nil, "for"),
+						e.NewForStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "for"),
 						e.NewMutexLockIns("mutex"),
 						e.NewAssignmentInstruction("i", e.NewAdditionExpression(e.NewVariableExpression("i"), e.NewLiteralExpression(2))),
 						e.NewStartIfStatement(
@@ -113,7 +113,7 @@ func GetLevel(id int) *Level {
 				),
 				e.DefaultThreadContext(
 					0, &[]e.Instruction{
-						e.NewForStartIns(nil, "for"),
+						e.NewForStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "for"),
 						e.NewCriticalSectionExpression(),
 						e.NewMutexLockIns("mutex"),
 						e.NewAssignmentInstruction("i", e.NewAdditionExpression(e.NewVariableExpression("i"), e.NewLiteralExpression(-1))),

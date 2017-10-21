@@ -206,7 +206,7 @@ func NewAssignmentInstruction(varName string, exp Expression) *ExpandableInstruc
 
 func NewStartIfStatement(exp Expression, name string) *IfInstruction {
 	base := baseInstruction{
-		Code:        IfStart() + AddBraces(exp) + Then(),
+		Code:        IfStart() + " " + exp.GetCode() + " " + Then(),
 		Description: "If statement",
 		Name:        name,
 	}
