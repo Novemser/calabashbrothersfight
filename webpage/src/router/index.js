@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import IndexPage from '@/components/Catalog'
-import Beginning from '@/components/Section/Beginning'
+import Level from '@/components/Level'
 
 Vue.use(Router)
 
@@ -13,9 +13,9 @@ export default new Router({
 			component: IndexPage
 		},
 		{
-			path: '/section/beginning',
-			name: 'Beginning',
-			component: Beginning
+			path: '/level/:level',
+			name: 'level',
+			component: Level
 		}
 	]
 })

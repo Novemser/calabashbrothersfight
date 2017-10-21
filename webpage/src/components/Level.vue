@@ -2,6 +2,7 @@
 	<div class="section">
 		<h1 class="title">{{ title }}</h1>
 		<p class="introduction" v-html="description"></p>
+		<h2 class="subtitle">代码</h2>
 		<div class="source">
 			<div v-for="(program, thread) in programs" class="thread" :key="thread">
 				<h3 class="thread-header">
@@ -29,11 +30,19 @@
 				</div>
 			</div>
 		</div>
+		<div class="context">
+			<h2 class="subtitle">变量</h2>
+			<div class="variable" v-for="(variable, index) in context" :key="index">
+				<span>{{ variable['name'] }}</span>
+				<span>:=</span>
+				<span>{{ variable['value'] }}</span>
+			</div>
+		</div>
 	</div>
 </template>
 
 <script>
-	import hightlightRules from '../../assets/highlight-rule'
+	import hightlightRules from '../assets/highlight-rule'
 	export default {
 		name: 'beginning',
 		props: {},
@@ -41,11 +50,26 @@
 			return {
 				title: '',
 				description: '',
-				programs: []
+				programs: [],
+				context: [],
+				gameStatus: 0
 			}
 		},
 		methods: {
-			mock () {
+			fetchData (level) {
+				this.axios.get(`/api/level/${level}`).then((response) => {
+					if (response && response.data) {
+						const data = response.data
+						if (data.status === 0) {
+							this.load(data.data)
+						} else {
+							this.openDialog('错误', data.msg)
+						}
+					}
+				}).catch(console.error.bind(this))
+			},
+			mock (level) {
+				console.log(`level => ${level}`)
 				return {
 					title: '教程 1: 接口',
 					description: `
@@ -167,13 +191,26 @@
 								}
 							]
 						}
-					]
+					],
+					context: [
+						{
+							name: 'flag',
+							value: true
+						},
+						{
+							name: 'a',
+							value: 0
+						}
+					],
+					gameStatus: -1
 				}
 			},
 			load (data) {
 				this.title = data.title
 				this.description = data.description
 				this.programs = data.programs
+				this.context = data.context
+				this.gameStatus = data.gameStatus
 			},
 			stepThread (thread) {
 				const currentIndex = this.programs[thread]['current'][0]
@@ -199,9 +236,23 @@
 				return code.replace(rule.string, `<span style="color:${rule.color}">${rule.string}</span>`)
 			}
 		},
+		watch: {
+			'gameStatus': function () {
+				switch (this.gameStatus) {
+				case -1:
+					this.openDialog('失败', '您太惨了2333')
+					break
+				case 1:
+					this.openDialog('成功', 'WOW你好厉害!恭喜!')
+					break
+				case 0:
+				default:
+				}
+			}
+		},
 		mounted: function () {
-			const data = this.mock()
-			this.load(data)
+			const level = this.$route.params.level
+			this.fetchData(level)
 		},
 		filters: {
 			showTab: function (quantity) {

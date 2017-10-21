@@ -102,6 +102,14 @@
 							color perple
 						.critical
 							color THEME_COLOR
+		.context
+			margin 32px 0 0
+			.variable
+
+				font-size 18px
+		.subtitle
+			margin 16px 0
+			border-bottom 1px solid THEME_COLOR
 
 
 
