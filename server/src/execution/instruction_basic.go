@@ -104,6 +104,20 @@ type CriticalSectionExpression struct {
 	baseInstruction
 }
 
+type PanicInstruction struct {
+	baseInstruction
+}
+
+func NewPanicIns(msg string) *PanicInstruction {
+	return &PanicInstruction{
+		baseInstruction{
+			Code:        MethodCall("panic", msg),
+			Name:        "panic",
+			Description: "Exit program",
+		},
+	}
+}
+
 func NewWhileStartIns(exp Expression, name string) *WhileInstruction {
 	return &WhileInstruction{
 		baseInstruction{
@@ -206,6 +220,10 @@ func NewEndIfStatement(name string) *EndIfInstruction {
 		Name:        name,
 	}
 	return &EndIfInstruction{base}
+}
+
+func (e *PanicInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
+	gc.IsPanic = true
 }
 
 func (e *CriticalSectionExpression) Execute(gc *GlobalContext, tc *ThreadContext) {
