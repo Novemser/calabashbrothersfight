@@ -33,10 +33,10 @@ func GetLevel(id int) *Level {
 				),
 				e.DefaultThreadContext(
 					1, &[]e.Instruction{
-						e.NewWhileStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "while"),
+						e.NewForStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "for"),
 						e.NewAssignmentInstruction("a", e.NewLiteralExpression(23)),
 						e.NewCriticalSectionExpression(),
-						e.NewEndWhileIns("while"),
+						e.NewEndForIns("for"),
 					},
 				),
 			},
@@ -91,9 +91,44 @@ func GetLevel(id int) *Level {
 				Key: "a", Value: e.GlobalStateType{"a", "a", 0},
 			}),
 		}
+	case 2:
+		return &Level{
+			"初级教程3",
+			"装甲再厚也能打破",
+			"葫芦兄弟的火娃被蛇精打伤，落单了，这时候蝎子精穿着他的新盔甲要抓他，尽管他的盔甲用上了互斥锁，但是还是有弱点，抓住时机，利用两个线程，一举击败他。",
+			[]*e.ThreadContext{
+				e.DefaultThreadContext(
+					0, &[]e.Instruction{
+						e.NewForStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "for"),
+						e.NewMutexLockIns("mutex"),
+						e.NewAssignmentInstruction("i", e.NewAdditionExpression(e.NewVariableExpression("i"), e.NewLiteralExpression(2))),
+						e.NewStartIfStatement(
+							e.NewEqualityExpression(e.NewVariableExpression("i"), e.NewLiteralExpression(5)), "if",
+						),
+						e.NewCriticalSectionExpression(),
+						e.NewEndIfStatement("if"),
+						e.NewMutexUnLockIns("mutex"),
+						e.NewEndForIns("for"),
+					},
+				),
+				e.DefaultThreadContext(
+					0, &[]e.Instruction{
+						e.NewForStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "for"),
+						e.NewCriticalSectionExpression(),
+						e.NewMutexLockIns("mutex"),
+						e.NewAssignmentInstruction("i", e.NewAdditionExpression(e.NewVariableExpression("i"), e.NewLiteralExpression(-1))),
+						e.NewMutexUnLockIns("mutex"),
+						e.NewEndForIns("for"),
+					},
+				),
+			},
+			e.NewGlobalContext(e.Pair{
+				Key: "mutex", Value: e.GlobalStateType{Name: "mutex", Value: e.Lock{LastLockedThreadID: -1, LockCount: 0}},
+			}, e.Pair{
+				Key: "i", Value: e.GlobalStateType{Name: "i", Value: 1},
+			}),
+		}
 	default:
 		return nil
 	}
 }
-
-var Level1 = GetLevel(1)

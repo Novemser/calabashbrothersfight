@@ -70,12 +70,16 @@ func checkForVictoryConditions() {
 		if reflect.TypeOf(currentInstruction) == reflect.TypeOf(&execution.CriticalSectionExpression{}) {
 			howManyCriticalSections++
 		}
-
 		fmt.Println(t)
 	}
 
 	if howManyCriticalSections >= 2 {
-		win("Two threads were in a critical section at the same time.")
+		win("More than one threads were in a critical section at the same time.")
+		return
+	}
+
+	if gameState.GlobalState.IsPanic {
+		win("Program entered panic instruction.")
 		return
 	}
 
