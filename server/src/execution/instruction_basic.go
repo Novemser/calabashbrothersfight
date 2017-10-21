@@ -75,12 +75,12 @@ type EndIfInstruction struct {
 	baseInstruction
 }
 
-type WhileInstruction struct {
+type ForInstruction struct {
 	baseInstruction
 	expr Expression
 }
 
-type EndWhileInstruction struct {
+type EndForInstruction struct {
 	baseInstruction
 }
 
@@ -118,21 +118,21 @@ func NewPanicIns(msg string) *PanicInstruction {
 	}
 }
 
-func NewWhileStartIns(exp Expression, name string) *WhileInstruction {
-	return &WhileInstruction{
+func NewForStartIns(exp Expression, name string) *ForInstruction {
+	return &ForInstruction{
 		baseInstruction{
-			Code:        WhileStart() + AddBraces(exp) + Then(),
-			Description: "While statement",
+			Code:        ForStart() + " " + exp.GetCode() + " " + Then(),
+			Description: "For statement",
 			Name:        name,
 		}, exp,
 	}
 }
 
-func NewEndWhileIns(name string) *EndWhileInstruction {
-	return &EndWhileInstruction{
+func NewEndForIns(name string) *EndForInstruction {
+	return &EndForInstruction{
 		baseInstruction{
 			Code:        End(),
-			Description: "End of while",
+			Description: "End of for",
 			Name:        name,
 		},
 	}
@@ -263,19 +263,19 @@ func (d *DummyInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 	moveToNextInstruction(tc)
 }
 
-func (i *WhileInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
+func (i *ForInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 	if (i.expr.Evaluate(gc, tc)).(bool) {
 		moveToNextInstruction(tc)
 	} else {
-		matchingEndWhile := findMatchingInsIndex(tc, i.GetName(), reflect.TypeOf(&EndWhileInstruction{}))
-		goToInstruction(tc, matchingEndWhile+1)
+		matchingEndFor := findMatchingInsIndex(tc, i.GetName(), reflect.TypeOf(&EndForInstruction{}))
+		goToInstruction(tc, matchingEndFor+1)
 	}
 }
 
-func (i *EndWhileInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
-	// We jump back to while start
-	matchingWhile := findMatchingInsIndex(tc, i.GetName(), reflect.TypeOf(&WhileInstruction{}))
-	goToInstruction(tc, matchingWhile)
+func (i *EndForInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
+	// We jump back to for start
+	matchingFor := findMatchingInsIndex(tc, i.GetName(), reflect.TypeOf(&ForInstruction{}))
+	goToInstruction(tc, matchingFor)
 }
 
 func (i *IfInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
@@ -308,11 +308,14 @@ func IfStart() string {
 	return "if"
 }
 
-func WhileStart() string {
-	return "while"
+func ForStart() string {
+	return "for"
 }
 
 func AddBraces(expCode Expression) string {
+	if expCode == nil {
+		return " "
+	}
 	return " (" + expCode.GetCode() + ") "
 }
 

@@ -70,7 +70,6 @@ func checkForVictoryConditions() {
 		if reflect.TypeOf(currentInstruction) == reflect.TypeOf(&execution.CriticalSectionExpression{}) {
 			howManyCriticalSections++
 		}
-
 		fmt.Println(t)
 	}
 
