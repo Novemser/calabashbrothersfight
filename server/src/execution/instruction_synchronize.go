@@ -18,7 +18,7 @@ type MutexUnlockInstruction struct {
 }
 
 func (i *MutexLockInstruction) IsBlocking(gc *GlobalContext, tc *ThreadContext) bool {
-	lockObj := gc.Values[i.lockName].Value.(Lock)
+	lockObj := gc.Values[i.lockName].Value.(*Lock)
 	if lockObj.LastLockedThreadID != -1 &&
 		lockObj.LastLockedThreadID != tc.Id {
 		// Waiting for other thread
@@ -55,7 +55,7 @@ func NewMutexUnLockIns(name string) *MutexUnlockInstruction {
 }
 
 func (i *MutexLockInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
-	lockObj := gc.Values[i.lockName].Value.(Lock)
+	lockObj := gc.Values[i.lockName].Value.(*Lock)
 	if lockObj.LastLockedThreadID != -1 && lockObj.LastLockedThreadID != tc.Id {
 		panic("WTF R U doing???")
 	} else {
@@ -70,7 +70,7 @@ func (i *MutexLockInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 }
 
 func (i *MutexUnlockInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
-	lockObj := gc.Values[i.lockName].Value.(Lock)
+	lockObj := gc.Values[i.lockName].Value.(*Lock)
 	if lockObj.LastLockedThreadID == tc.Id {
 		lockObj.LockCount--
 		if lockObj.LockCount <= 0 {

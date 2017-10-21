@@ -4,11 +4,17 @@ import (
 	"testing"
 	"fmt"
 )
-
+type Level struct {
+	Label          string
+	Title          string
+	Description    string
+	ThreadContexts []*ThreadContext
+	GlobalContext  *GlobalContext
+}
 func TestNewThread(t *testing.T) {
 	gc := NewGlobalContext(Pair{
 		"a",
-		GlobalStateType{Value:0, Name:"a"},
+		GlobalStateType{Value: 0, Name: "a"},
 	})
 	//gc.Values["a"] = GlobalStateType{Value: 0, Name: "a"}
 	/**
@@ -22,7 +28,7 @@ func TestNewThread(t *testing.T) {
 	assignIn := NewAssignmentInstruction("a", NewLiteralExpression(10))
 	ifUp := NewStartIfStatement(
 		NewEqualityExpression(NewVariableExpression("a"), NewLiteralExpression(3)),
-			"if1")
+		"if1")
 	ifEnd := NewEndIfStatement("if1")
 
 	context := NewThreadContext(0, 0, 0, []Instruction{assign, ifUp, assignIn, ifEnd})
@@ -35,5 +41,15 @@ func TestNewThread(t *testing.T) {
 }
 
 func TestLevel(t *testing.T) {
+	level := &Level{
 
+	}
+	gc := level.GlobalContext
+	ins := level.ThreadContexts[0].Instructions
+	le := len(*ins)
+	for i := 0; i < le; {
+		ii := (*ins)[i]
+		ii.Execute(gc, level.ThreadContexts[0])
+		i = level.ThreadContexts[0].ProgramCounter
+	}
 }

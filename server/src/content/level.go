@@ -41,7 +41,7 @@ func GetLevel(id int) *Level {
 				),
 			},
 			e.NewGlobalContext(e.Pair{
-				Key: "mutex", Value: e.GlobalStateType{Name: "mutex", Value: e.Lock{LastLockedThreadID: -1, LockCount: 0}},
+				Key: "mutex", Value: e.GlobalStateType{Name: "mutex", Value: &e.Lock{LastLockedThreadID: -1, LockCount: 0}},
 			}),
 		}
 	case 1:
@@ -123,11 +123,18 @@ func GetLevel(id int) *Level {
 				),
 			},
 			e.NewGlobalContext(e.Pair{
-				Key: "mutex", Value: e.GlobalStateType{Name: "mutex", Value: e.Lock{LastLockedThreadID: -1, LockCount: 0}},
+				Key: "mutex", Value: e.GlobalStateType{Name: "mutex", Value: &e.Lock{LastLockedThreadID: -1, LockCount: 0}},
 			}, e.Pair{
 				Key: "i", Value: e.GlobalStateType{Name: "i", Value: 1},
 			}),
 		}
+	//case 3:
+		//return &Level{
+		//	"",
+		//	"",
+		//	"",
+		//
+		//}
 	default:
 		return nil
 	}
