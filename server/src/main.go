@@ -9,7 +9,8 @@ func stepThread(thread int) {
 	if IsLevelPristine() {
 		//第一步执行
 	}
-	var program = gameState.GetProgramOfThread(thread);
+	var program = gameState.GetProgramOfThread(thread)
+	var threadState = gameState.threadState[thread]
 	fmt.Println(program)
 
 }
