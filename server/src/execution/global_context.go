@@ -2,6 +2,7 @@ package execution
 
 type GlobalContext struct {
 	Values map[string]GlobalStateType
+	LockMsg string
 }
 
 type Pair struct {

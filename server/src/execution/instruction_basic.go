@@ -114,12 +114,32 @@ func NewWhileStartIns(exp Expression, name string) *WhileInstruction {
 	}
 }
 
-func NewEndWhileIns(exp Expression, name string) *EndWhileInstruction {
+func NewEndWhileIns(name string) *EndWhileInstruction {
 	return &EndWhileInstruction{
 		baseInstruction{
 			Code:        End(),
 			Description: "End of while",
 			Name:        name,
+		},
+	}
+}
+
+func NewDummyInstruction(funcName string) *DummyInstruction {
+	return &DummyInstruction{
+		baseInstruction{
+			Code:        MethodCall(funcName),
+			Name:        funcName,
+			Description: "无用的业务代码",
+		},
+	}
+}
+
+func NewCommentInstruction(msg string) *CommentInstruction {
+	return &CommentInstruction{
+		baseInstruction{
+			Code:        CommonStart() + msg,
+			Name:        "comment",
+			Description: "Comment instruction",
 		},
 	}
 }
@@ -292,4 +312,8 @@ func InstructionExpr(code string) string {
 
 func AssignmentExpr(left Expression, right Expression) string {
 	return BinaryOperationCode(left, right, "=")
+}
+
+func CommonStart() string {
+	return "// "
 }

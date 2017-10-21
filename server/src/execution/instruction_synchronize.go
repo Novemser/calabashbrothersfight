@@ -1,8 +1,10 @@
 package execution
 
+import "fmt"
+
 type Lock struct {
-	lastLockedThreadID int
-	lockCount          int
+	LastLockedThreadID int
+	LockCount          int
 }
 
 type MutexLockInstruction struct {
@@ -13,6 +15,19 @@ type MutexLockInstruction struct {
 type MutexUnlockInstruction struct {
 	baseInstruction
 	lockName string
+}
+
+func (i *MutexLockInstruction) IsBlocking(gc *GlobalContext, tc *ThreadContext) bool {
+	lockObj := gc.Values[i.lockName].Value.(Lock)
+	if lockObj.LastLockedThreadID != -1 &&
+		lockObj.LastLockedThreadID != tc.Id {
+		// Waiting for other thread
+		gc.LockMsg = "Thread " + fmt.Sprint(tc.Id) + " is waiting for thread " + fmt.Sprint(lockObj.LastLockedThreadID)
+		return true
+	} else {
+		gc.LockMsg = "Thread " + fmt.Sprint(tc.Id) + " occupied lock " + i.lockName
+		return false
+	}
 }
 
 func NewMutexLockIns(name string) *MutexLockInstruction {
@@ -41,14 +56,14 @@ func NewMutexUnLockIns(name string) *MutexUnlockInstruction {
 
 func (i *MutexLockInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 	lockObj := gc.Values[i.lockName].Value.(Lock)
-	if lockObj.lastLockedThreadID != -1 && lockObj.lastLockedThreadID != tc.Id {
+	if lockObj.LastLockedThreadID != -1 && lockObj.LastLockedThreadID != tc.Id {
 		panic("WTF R U doing???")
 	} else {
-		lockObj.lastLockedThreadID = tc.Id
-		if lockObj.lockCount >= 0 {
-			lockObj.lockCount++
+		lockObj.LastLockedThreadID = tc.Id
+		if lockObj.LockCount >= 0 {
+			lockObj.LockCount++
 		} else {
-			lockObj.lockCount = 1
+			lockObj.LockCount = 1
 		}
 		moveToNextInstruction(tc)
 	}
@@ -56,10 +71,10 @@ func (i *MutexLockInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 
 func (i *MutexUnlockInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 	lockObj := gc.Values[i.lockName].Value.(Lock)
-	if lockObj.lastLockedThreadID == tc.Id {
-		lockObj.lockCount--
-		if lockObj.lockCount <= 0 {
-			lockObj.lastLockedThreadID = -1
+	if lockObj.LastLockedThreadID == tc.Id {
+		lockObj.LockCount--
+		if lockObj.LockCount <= 0 {
+			lockObj.LastLockedThreadID = -1
 		}
 	} else {
 		panic("WTF R UU doing??")

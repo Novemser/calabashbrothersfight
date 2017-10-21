@@ -4,6 +4,8 @@
 *.ipr
 *.iws
 out
+server/pkg/linux_amd64/content.a
+server/pkg/linux_amd64/execution.a
 
 # Binaries for programs and plugins
 *.exe
