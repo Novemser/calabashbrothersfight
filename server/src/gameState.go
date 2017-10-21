@@ -1,6 +1,6 @@
 package main
 
-import "instructions"
+import "execution"
 
 type GameState struct {
 	threadState int
@@ -12,6 +12,6 @@ func (g *GameState) ResetForLevel(level Level) {
 
 }
 
-func (g *GameState) GetProgramOfThread(threadId int) []instructions.Instruction {
+func (g *GameState) GetProgramOfThread(threadId int) []execution.Instruction {
 	return g.level.threads[threadId].Instructions
 }
