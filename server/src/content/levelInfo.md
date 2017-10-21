@@ -1,16 +1,20 @@
-while (true) {
-  Monitor.Enter(mutex);
-  i = i + 2;
-  if (i == 5) {
-     critical_section();
+
+
+
+for {
+	mutex.Lock()
+	i = i + 2
+	if i == 5 {
+     critical_section()
   }
-  Monitor.Exit(mutex);
+	mutex.Unlock()
+  
 }
 
+for {
+	critical_section()
+	mutex.Lock()
+	i = i - 1;
+	mutex.Unlock()
+ }
 
-while (true) {
-  critical_section();
-  Monitor.Enter(mutex);
-  i = i - 1;
-  Monitor.Exit(mutex);
-}
