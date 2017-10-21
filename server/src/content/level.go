@@ -1,4 +1,4 @@
-package main
+package content
 
 import (
 	e "execution"
@@ -55,6 +55,6 @@ var Level1 = &Level{
 		),
 	},
 	e.NewGlobalContext(e.Pair{
-		"a", e.GlobalStateType{"a", "a", 0},
+		Key:"a", Value:e.GlobalStateType{"a", "a", 0},
 	}),
 }

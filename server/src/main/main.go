@@ -3,32 +3,33 @@ package main
 import (
 	"fmt"
 	"container/list"
-	"github.com/kataras/iris"
-	"github.com/kataras/iris/middleware/logger"
-	"github.com/kataras/iris/middleware/recover"
-	"strconv"
+	//"github.com/kataras/iris"
+	//"github.com/kataras/iris/middleware/logger"
+	//"github.com/kataras/iris/middleware/recover"
+	//"strconv"
+	c "content"
 )
 
-var gameState = new(GameState)
+var gameState = new(c.GameState)
 var undoHistory = list.New()
 
 func saveForUndo() {
-	var history = History{gameState.threadContexts, gameState.globalState}
+	var history = c.History{gameState.ThreadContexts, gameState.GlobalState}
 	undoHistory.PushBack(history)
 }
 
 //TODO
-func StartLevel(levelName string) {
+func startLevel(levelName string) {
 	//清空
 	for e := undoHistory.Front(); e != nil; e = e.Next() {
 		undoHistory.Remove(e)
 	}
 
 	// 开始
-	var level = Level1
-	gameState.globalState = *level.GlobalContext
-	gameState.threadContexts = level.ThreadContexts
-	gameState.level = *level
+	var level = c.Level1
+	gameState.GlobalState = *level.GlobalContext
+	gameState.ThreadContexts = level.ThreadContexts
+	gameState.Level = *level
 
 	for i := 0; i < len(level.ThreadContexts[0].Instructions); i++ {
 		stepThread(0)
@@ -46,14 +47,14 @@ func areAllThreadsFinished() bool {
 func checkForVictoryConditions() {
 	var howManyCriticalSections = 0
 
-	for threadId, t := range gameState.level.ThreadContexts {
+	for threadId, t := range gameState.Level.ThreadContexts {
 
 		if IsThreadFinished(threadId) {
 			continue
 		}
-		var thread = gameState.level.ThreadContexts[threadId]
+		var thread = gameState.Level.ThreadContexts[threadId]
 		var instructions = thread.Instructions
-		var threadState = gameState.threadContexts[threadId]
+		var threadState = gameState.ThreadContexts[threadId]
 		var programCounter = threadState.ProgramCounter
 		var currentInstruction = instructions[programCounter]
 		fmt.Print(currentInstruction)
@@ -91,15 +92,15 @@ func lose(loseInfo string) {
 
 func expandThread(threadId int) {
 	saveForUndo()
-	gameState.threadContexts[threadId].Expanded = true
+	gameState.ThreadContexts[threadId].Expanded = true
 }
 
 func undo() {
 
 	for e := undoHistory.Front(); e != nil; e = e.Next() {
 		if e.Next() == nil {
-			gameState.globalState = e.Value.(History).globalContext
-			gameState.threadContexts = e.Value.(History).threadContext
+			gameState.GlobalState = e.Value.(c.History).GlobalContext
+			gameState.ThreadContexts = e.Value.(c.History).ThreadContext
 			undoHistory.Remove(e)
 		}
 	}
@@ -111,16 +112,16 @@ func stepThread(thread int) {
 	////sendEvent('Gameplay', 'level-first-step', gameState.getLevelId());
 	//}
 	var program = gameState.GetProgramOfThread(thread)
-	var threadState = gameState.threadContexts[thread]
+	var threadState = gameState.ThreadContexts[thread]
 	var pc = threadState.ProgramCounter
 
-	if IsThreadFinished(thread) {
+	if !IsThreadFinished(thread) {
 		saveForUndo()
 		if threadState.Expanded {
 			//展开了的情况
-			program[pc].GetExpandInstructions()[threadState.ExpProgramCounter].Execute(&gameState.globalState, &threadState)
+			program[pc].GetExpandInstructions()[threadState.ExpProgramCounter].Execute(&gameState.GlobalState, &threadState)
 		} else {
-			program[pc].Execute(&gameState.globalState, &threadState)
+			program[pc].Execute(&gameState.GlobalState, &threadState)
 		}
 		checkForVictoryConditions()
 
@@ -132,7 +133,7 @@ func stepThread(thread int) {
 func IsThreadFinished(threadId int) bool {
 	program := gameState.GetProgramOfThread(threadId)
 	var maxInstructions = len(program)
-	var threadState = gameState.threadContexts[threadId]
+	var threadState = gameState.ThreadContexts[threadId]
 	var pc = threadState.ProgramCounter
 
 	return pc >= maxInstructions
@@ -213,18 +214,18 @@ func loadLevel(id int, err error) BackResponse {
 }
 
 func main() {
-	//startLevel("L1")
-	app := iris.New()
-	app.Use(recover.New())
-	app.Use(logger.New())
-
-	// 加载关卡
-	app.Get("/api/level/{id}", func(ctx iris.Context) {
-		levelIdStr := ctx.Params().Get("id")
-		levelId, err := strconv.Atoi(levelIdStr)
-		ctx.JSON(loadLevel(levelId, err))
-	})
-
-	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
+	startLevel("L1")
+	//app := iris.New()
+	//app.Use(recover.New())
+	//app.Use(logger.New())
+	//
+	//// 加载关卡
+	//app.Get("/api/level/{id}", func(ctx iris.Context) {
+	//	levelIdStr := ctx.Params().Get("id")
+	//	levelId, err := strconv.Atoi(levelIdStr)
+	//	ctx.JSON(loadLevel(levelId, err))
+	//})
+	//
+	//app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
 
 }

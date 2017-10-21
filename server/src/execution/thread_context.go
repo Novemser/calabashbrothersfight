@@ -6,7 +6,7 @@ type ThreadContext struct {
 	ExpProgramCounter int // expanded instruction program counter
 	Instructions      []Instruction
 	Expanded          bool
-	TempVariable      interface{} // Temp variable to store value
+	TempVariable      interface{} // Temp variable to store Value
 }
 
 func DefaultThreadContext(id int, insList []Instruction) ThreadContext {

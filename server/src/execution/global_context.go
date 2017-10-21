@@ -5,14 +5,14 @@ type GlobalContext struct {
 }
 
 type Pair struct {
-	key string
-	value GlobalStateType
+	Key   string
+	Value GlobalStateType
 }
 
 func NewGlobalContext(args...Pair) *GlobalContext {
 	mapCtx := make(map[string]GlobalStateType)
 	for _, pair := range args {
-		mapCtx[pair.key] = pair.value
+		mapCtx[pair.Key] = pair.Value
 	}
 
 	return &GlobalContext{

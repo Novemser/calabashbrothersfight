@@ -8,9 +8,9 @@ import (
 func TestNewThread(t *testing.T) {
 	gc := NewGlobalContext(Pair{
 		"a",
-		GlobalStateType{value:0, name:"a"},
+		GlobalStateType{Value:0, Name:"a"},
 	})
-	//gc.values["a"] = GlobalStateType{value: 0, name: "a"}
+	//gc.values["a"] = GlobalStateType{Value: 0, Name: "a"}
 	/**
 	a = 0;
 	if (a == 3) {
