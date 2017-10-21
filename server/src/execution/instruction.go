@@ -84,7 +84,7 @@ func (d *DummyInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 }
 
 func (i *IfInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
-	if bool(i.exp.Evaluate(gc, tc)) {
+	if (i.exp.Evaluate(gc, tc)).(bool) {
 		moveToNextInstruction(tc)
 	} else {
 
