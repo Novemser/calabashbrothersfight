@@ -68,10 +68,19 @@ type DummyInstruction struct {
 
 type IfInstruction struct {
 	baseInstruction
-	exp Expression
+	expr Expression
 }
 
 type EndIfInstruction struct {
+	baseInstruction
+}
+
+type WhileInstruction struct {
+	baseInstruction
+	expr Expression
+}
+
+type EndWhileInstruction struct {
 	baseInstruction
 }
 
@@ -95,12 +104,32 @@ type CriticalSectionExpression struct {
 	baseInstruction
 }
 
+func NewWhileStartIns(exp Expression, name string) *WhileInstruction {
+	return &WhileInstruction{
+		baseInstruction{
+			Code:        WhileStart() + AddBraces(exp) + Then(),
+			Description: "While statement",
+			Name:        name,
+		}, exp,
+	}
+}
+
+func NewEndWhileIns(exp Expression, name string) *EndWhileInstruction {
+	return &EndWhileInstruction{
+		baseInstruction{
+			Code:        End(),
+			Description: "End of while",
+			Name:        name,
+		},
+	}
+}
+
 func NewCriticalSectionExpression() *CriticalSectionExpression {
 	return &CriticalSectionExpression{
 		baseInstruction{
-			Code:InstructionExpr("criticalSection()"),
-			Name:"Critical section",
-			Description:"Critical section",
+			Code:        InstructionExpr("criticalSection()"),
+			Name:        "Critical section",
+			Description: "Critical section",
 		},
 	}
 }
@@ -129,7 +158,7 @@ func NewAtomicAssignToTemp(exprRight Expression) *AtomicAssignmentToTemp {
 	return &AtomicAssignmentToTemp{base, exprRight}
 }
 
-func NewAssignmentStatment(varName string, exp Expression) *ExpandableInstruction {
+func NewAssignmentInstruction(varName string, exp Expression) *ExpandableInstruction {
 	expInsList := []Instruction{
 		NewAtomicAssignToTemp(exp),
 		NewAtomicAssignFromTemp(NewVariableExpression(varName)),
@@ -196,8 +225,23 @@ func (d *DummyInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
 	moveToNextInstruction(tc)
 }
 
+func (i *WhileInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
+	if (i.expr.Evaluate(gc, tc)).(bool) {
+		moveToNextInstruction(tc)
+	} else {
+		matchingEndWhile := findMatchingInsIndex(tc, i.GetName(), reflect.TypeOf(&EndWhileInstruction{}))
+		goToInstruction(tc, matchingEndWhile+1)
+	}
+}
+
+func (i *EndWhileInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
+	// We jump back to while start
+	matchingWhile := findMatchingInsIndex(tc, i.GetName(), reflect.TypeOf(&WhileInstruction{}))
+	goToInstruction(tc, matchingWhile)
+}
+
 func (i *IfInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
-	if (i.exp.Evaluate(gc, tc)).(bool) {
+	if (i.expr.Evaluate(gc, tc)).(bool) {
 		moveToNextInstruction(tc)
 	} else {
 		matchingEndIf := findMatchingInsIndex(tc, i.GetName(), reflect.TypeOf(&EndIfInstruction{}))
@@ -224,6 +268,10 @@ func findMatchingInsIndex(context *ThreadContext, name string, tp reflect.Type) 
 
 func IfStart() string {
 	return "if"
+}
+
+func WhileStart() string {
+	return "while"
 }
 
 func AddBraces(expCode Expression) string {

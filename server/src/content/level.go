@@ -19,7 +19,7 @@ var Level1 = &Level{
 	[]e.ThreadContext{
 		e.DefaultThreadContext(
 			0, []e.Instruction{
-				e.NewAssignmentStatment("a",
+				e.NewAssignmentInstruction("a",
 					e.NewAdditionExpression(
 						e.NewVariableExpression("a"),
 						e.NewLiteralExpression(1),
@@ -37,7 +37,7 @@ var Level1 = &Level{
 		),
 		e.DefaultThreadContext(
 			1, []e.Instruction{
-				e.NewAssignmentStatment("a",
+				e.NewAssignmentInstruction("a",
 					e.NewAdditionExpression(
 						e.NewVariableExpression("a"),
 						e.NewLiteralExpression(1),
