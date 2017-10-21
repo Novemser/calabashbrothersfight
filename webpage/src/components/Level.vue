@@ -96,9 +96,9 @@
 					for (let i = 0; i < program.length; i++) {
 						const code = program[i]
 						code.indent = indent
-						if (['If statement', 'While statement'].indexOf(code.description) !== -1) {
+						if (['If statement', 'For statement'].indexOf(code.description) !== -1) {
 							indent++
-						} else if (['End if statement', 'End of while'].indexOf(code.description) !== -1) {
+						} else if (['End if statement', 'End of for'].indexOf(code.description) !== -1) {
 							indent--
 							code.indent = indent
 						}
