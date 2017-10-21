@@ -296,6 +296,4 @@
 </script>
 
 <style lang="stylus">
-	.high-light
-		color red
 </style>

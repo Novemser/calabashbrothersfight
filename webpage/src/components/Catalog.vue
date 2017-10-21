@@ -28,4 +28,6 @@
 <style lang="stylus">
 	.index-page
 		font-size 16px
+		.high-light
+			color red
 </style>
