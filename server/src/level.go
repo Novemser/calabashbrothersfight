@@ -8,7 +8,7 @@ type Level struct {
 	shortDescription string
 	longDescription string
 	victoryText string
-	threads execution.ThreadContext
+	threads []execution.ThreadContext
 	variables string
 
 }

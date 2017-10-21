@@ -13,5 +13,5 @@ func (g *GameState) ResetForLevel(level Level) {
 }
 
 func (g *GameState) GetProgramOfThread(threadId int) []instructions.Instruction {
-	return g.level.threads.Instructions
+	return g.level.threads[threadId].Instructions
 }
