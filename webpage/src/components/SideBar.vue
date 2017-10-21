@@ -30,8 +30,8 @@
 						link: '/'
 					},
 					{
-						name: 'section-beginning',
-						link: '/section/beginning'
+						name: '教程1 - 接口',
+						link: '/level/1'
 					}
 				]
 			}
