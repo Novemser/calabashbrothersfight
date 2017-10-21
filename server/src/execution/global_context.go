@@ -1,5 +1,5 @@
 package execution
 
-type global_context struct {
+type GlobalContext struct {
 	values map[string]string
 }

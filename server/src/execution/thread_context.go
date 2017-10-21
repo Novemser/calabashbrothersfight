@@ -2,7 +2,9 @@ package execution
 
 import "instructions"
 
-type thread_context struct{
-	pc int32 // program context
-	instructions []instructions.Instruction
+type ThreadContext struct{
+	ProgramCounter int // program counter
+	ExpProgramCounter int // expanded instruction program counter
+	Instructions []instructions.Instruction
+	Expanded bool
 }
