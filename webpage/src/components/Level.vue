@@ -48,6 +48,7 @@
 		props: {},
 		data () {
 			return {
+				level: 0,
 				title: '',
 				description: '',
 				programs: [],
@@ -56,14 +57,15 @@
 			}
 		},
 		methods: {
-			fetchData (level) {
-				this.axios.get(`/api/level/${level}`).then((response) => {
+			fetchData (url) {
+				this.axios.get(url).then((response) => {
 					if (response && response.data) {
 						const data = response.data
 						if (data.status === 0) {
 							this.load(data.data)
 						} else {
 							this.openDialog('错误', data.msg)
+							console.error(data.msg)
 						}
 					}
 				}).catch(console.error.bind(this))
@@ -212,23 +214,21 @@
 				this.context = data.context
 				this.gameStatus = data.gameStatus
 			},
+			/**
+			 * 步进下一条指令
+			 * @param thread 协程索引$index
+			 */
 			stepThread (thread) {
-				const currentIndex = this.programs[thread]['current'][0]
-
-				this.$set(this.programs[thread]['current'], 1, 0)
-				if (currentIndex < this.programs[thread]['code'].length) {
-					this.$set(this.programs[thread]['current'], 0, currentIndex + 1)
-				}
-				this.$set(this.disabledControls[thread], 1, !this.programs[thread]['code'][currentIndex + 1].expandable)
+				const currentLine = this.programs[thread]['current'][0]
+				this.fetchData(`/api/stepthread/${this.level}/${thread}/${currentLine}`)
 			},
 			/**
 			 * 展开一条指令
 			 * @param thread 协程索引$index
 			 */
 			expand: function (thread) {
-				const currentIndex = this.programs[thread]['current'][0]
-				const program = this.programs[thread]['code']
-				this.$set(program[currentIndex], 'expanded', true)
+				const currentLine = this.programs[thread]['current'][0]
+				this.fetchData(`/api/expand/${this.level}/${thread}/${currentLine}`)
 			},
 			highlight: function (code, name) {
 				const rule = hightlightRules[name]
@@ -251,8 +251,8 @@
 			}
 		},
 		mounted: function () {
-			const level = this.$route.params.level
-			this.fetchData(level)
+			this.level = this.$route.params.level
+			this.fetchData(`/api/level/${this.level}`)
 		},
 		filters: {
 			showTab: function (quantity) {
