@@ -79,7 +79,7 @@
 			justify-content space-between
 			align-items flex-start
 			.introduction
-				margin 0
+				margin 0 16px 0 0
 			.source-controls
 				display flex
 				flex-flow row

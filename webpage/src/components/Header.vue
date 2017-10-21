@@ -1,5 +1,5 @@
 <template>
-	<mu-appbar class="header" title="Calabash Brothers VS Multi-thread">
+	<mu-appbar class="header" title="葫芦兄弟大战多线程白骨精">
 		<mu-icon-button v-on:click="switchSidebar" icon="menu" slot="left"/>
 	</mu-appbar>
 </template>
