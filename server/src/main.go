@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"container/list"
 	"github.com/kataras/iris"
-	"github.com/kataras/iris/mvc"
+	"github.com/kataras/iris/middleware/logger"
+	"github.com/kataras/iris/middleware/recover"
 )
 
 var gameState = new(GameState)
@@ -124,7 +125,16 @@ func IsLevelPristine() bool {
 	return true
 }
 
-//TODO 删掉的东西
+// View Model
+type LevelInfo struct {
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Programs    []Program `json:"programs"`
+}
+type Program struct {
+	CanStepNext bool  `json:"canStepNext"`
+	Current     []int `json:"current"`
+}
 
 // Movie is our sample data structure.
 type Movie struct {
@@ -161,76 +171,28 @@ var movies = []Movie{
 		Poster: "https://iris-go.com/images/examples/mvc-movies/4.jpg",
 	},
 }
+var p = []Program{
+	{
+		CanStepNext: true,
+		Current:     []int{1, 2},
+	},
+	{
+		CanStepNext: false,
+		Current:     []int{1, 2},
+	},
+}
+
+var levelInfo = LevelInfo{Title: "a", Description: "d", Programs: p}
 
 func main() {
-
 	app := iris.New()
+	app.Use(recover.New())
+	app.Use(logger.New())
 
-	app.Controller("/movies", new(MoviesController))
+	app.Get("/api/level/{id}", func(ctx iris.Context) {
+		//movies[0].Name = ctx.Params().Get("id")
+		ctx.JSON(levelInfo)
+	})
+	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
 
-	app.Run(iris.Addr(":8080"))
-}
-
-// MoviesController is our /movies controller.
-type MoviesController struct {
-	// if you build with go1.8 you have to use the mvc package always,
-	// otherwise
-	// you can, optionally
-	// use the type alias `iris.C`,
-	// same for
-	// context.Context -> iris.Context,
-	// mvc.Result -> iris.Result,
-	// mvc.Response -> iris.Response,
-	// mvc.View -> iris.View
-	mvc.C
-}
-
-// Get returns list of the movies
-// Demo:
-// curl -i http://localhost:8080/movies
-func (c *MoviesController) Get() []Movie {
-	return movies
-}
-
-// GetBy returns a movie
-// Demo:
-// curl -i http://localhost:8080/movies/1
-func (c *MoviesController) GetBy(id int) Movie {
-	return movies[id]
-}
-
-// PutBy updates a movie
-// Demo:
-// curl -i -X PUT -F "genre=Thriller" -F "poster=@/Users/kataras/Downloads/out.gif" http://localhost:8080/movies/1
-func (c *MoviesController) PutBy(id int) Movie {
-	// get the movie
-	m := movies[id]
-
-	// get the request data for poster and genre
-	file, info, err := c.Ctx.FormFile("poster")
-	if err != nil {
-		c.Ctx.StatusCode(iris.StatusInternalServerError)
-		return Movie{}
-	}
-	file.Close()            // we don't need the file
-	poster := info.Filename // imagine that as the url of the uploaded file...
-	genre := c.Ctx.FormValue("genre")
-
-	// update the poster
-	m.Poster = poster
-	m.Genre = genre
-	movies[id] = m
-
-	return m
-}
-
-// DeleteBy deletes a movie
-// Demo:
-// curl -i -X DELETE -u admin:password http://localhost:8080/movies/1
-func (c *MoviesController) DeleteBy(id int) iris.Map {
-	// delete the entry from the movies slice
-	deleted := movies[id].Name
-	movies = append(movies[:id], movies[id+1:]...)
-	// and return the deleted movie's name
-	return iris.Map{"deleted": deleted}
 }
