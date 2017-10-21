@@ -3,6 +3,6 @@ package main
 import "execution"
 
 type History struct {
-	threadState   []ThreadState
+	threadContext  []execution.ThreadContext
 	globalContext execution.GlobalContext
 }

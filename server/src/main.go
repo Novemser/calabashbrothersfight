@@ -6,7 +6,7 @@ var gameState = new(GameState)
 var undoHistory = []History{}
 
 func saveForUndo() {
-	var history = History{gameState.threadStates, gameState.globalState}
+	var history = History{gameState.threadContext, gameState.globalState}
 	undoHistory = append(undoHistory, history)
 
 }
@@ -22,13 +22,14 @@ func stepThread(thread int) {
 		//sendEvent('Gameplay', 'level-first-step', gameState.getLevelId());
 	}
 	var program = gameState.GetProgramOfThread(thread)
-	var threadState = gameState.threadStates[thread]
-	var pc = threadState.tc.ProgramCounter
+	var threadState = gameState.threadContext[thread]
+	var pc = threadState.ProgramCounter
 
 	if IsThreadFinished(thread) {
 		saveForUndo()
-		if threadState.tc.Expanded {
-			program[pc].Execute()
+		if threadState.Expanded {
+			//展开了的情况
+			program[pc].GetExpandInstructions()[threadState.ExpProgramCounter].Execute()
 		}
 	}
 	fmt.Println(program, threadState, pc)
@@ -38,8 +39,8 @@ func stepThread(thread int) {
 func IsThreadFinished(threadId int) bool {
 	program := gameState.GetProgramOfThread(threadId)
 	var maxInstructions = len(program)
-	var threadState = gameState.threadStates[threadId]
-	var pc = threadState.tc.ProgramCounter
+	var threadState = gameState.threadContext[threadId]
+	var pc = threadState.ProgramCounter
 
 	return pc >= maxInstructions
 }

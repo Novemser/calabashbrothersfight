@@ -3,7 +3,7 @@ package main
 import "execution"
 
 type GameState struct {
-	threadStates []ThreadState
+	threadContext []execution.ThreadContext
 	level       Level
 	globalState execution.GlobalContext
 }

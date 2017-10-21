@@ -1,7 +1,8 @@
 package execution
 
 type GlobalStateType struct {
-	name string
+	name        string
 	displayName string
 	relativeUrl string
+	value       string
 }
