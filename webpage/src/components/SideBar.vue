@@ -4,7 +4,7 @@
 			<router-link v-for="(navigator, index) in navigators" :key="index" v-bind:to="navigator['link']">
 				<mu-list-item>
 					<div class="item">
-						<mu-icon value="settings" :size="20"></mu-icon>
+						<mu-icon value="star" :size="20"></mu-icon>
 						<span>{{ navigator['name'] }}</span>
 					</div>
 				</mu-list-item>
@@ -26,7 +26,7 @@
 			return {
 				navigators: [
 					{
-						name: 'introduction',
+						name: '首页',
 						link: '/'
 					},
 					{
@@ -36,6 +36,14 @@
 					{
 						name: '魔鬼般的赋值语句',
 						link: '/level/1'
+					},
+					{
+						name: '装甲再厚也能打破',
+						link: '/level/2'
+					},
+					{
+						name: '武功再高也怕菜刀',
+						link: '/level/3'
 					}
 				]
 			}
