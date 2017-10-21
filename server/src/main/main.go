@@ -20,6 +20,8 @@ func saveForUndo() {
 	undoHistory.PushBack(history)
 }
 
+//-1失败、0正常、1成功
+var runState = 0
 //TODO
 func startLevel(levelId int) {
 	//清空
@@ -89,10 +91,12 @@ func checkForVictoryConditions() {
 }
 
 func win(winInfo string) {
+	runState = 1
 	fmt.Print(winInfo)
 }
 
 func lose(loseInfo string) {
+	runState = -1
 	fmt.Print(loseInfo)
 }
 
@@ -224,7 +228,7 @@ func packageData() LevelInfo {
 	levelInfo.Title = gameState.Level.Title
 	levelInfo.CanUndo = checkCanUndo()
 	levelInfo.Description = gameState.Level.Description
-	levelInfo.GameStatus = 0
+	levelInfo.GameStatus = runState
 	for _, pro := range gameState.ThreadContexts {
 		p := Program{}
 
@@ -280,6 +284,7 @@ func main() {
 
 	// 加载关卡
 	app.Get("/api/level/{id}", func(ctx iris.Context) {
+		runState = 0
 		levelIdStr := ctx.Params().Get("id")
 		levelId, err := strconv.Atoi(levelIdStr)
 		startLevel(levelId)
