@@ -144,6 +144,17 @@ func stepThread(thread int) {
 	fmt.Println(gameState.GlobalState)
 }
 
+func IsThreadBlocked(threadId int) bool {
+	if IsThreadFinished(threadId) {
+		return false
+	}
+
+	var threadState = gameState.ThreadContexts[threadId]
+	var currentIns = (*threadState.Instructions)[threadState.ProgramCounter]
+
+	return currentIns.IsBlocking(gameState.GlobalState, threadState)
+}
+
 func IsThreadFinished(threadId int) bool {
 	program := gameState.GetProgramOfThread(threadId)
 	var maxInstructions = len(program)
@@ -251,7 +262,7 @@ func packageData() LevelInfo {
 		var temp = (*pro.Instructions)[pro.ProgramCounter]
 
 		p.CanCurrentExpand = temp != nil && len(temp.GetExpandInstructions()) > 0
-		p.CanStepNext = !IsThreadFinished(pro.Id)
+		p.CanStepNext = !IsThreadFinished(pro.Id) && !IsThreadBlocked(pro.Id)
 		p.Current = []int{pro.ProgramCounter, pro.ExpProgramCounter}
 
 		levelInfo.Programs = append(levelInfo.Programs, p)

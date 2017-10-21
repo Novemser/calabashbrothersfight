@@ -112,7 +112,7 @@ func GetLevel(id int) *Level {
 					},
 				),
 				e.DefaultThreadContext(
-					0, &[]e.Instruction{
+					1, &[]e.Instruction{
 						e.NewForStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "for"),
 						e.NewCriticalSectionExpression(),
 						e.NewMutexLockIns("mutex"),
