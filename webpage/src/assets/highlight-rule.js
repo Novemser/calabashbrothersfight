@@ -3,16 +3,36 @@ export default {
 		string: 'if',
 		color: 'red'
 	},
-	'while': {
-		string: 'while',
+	'for': {
+		string: 'for',
 		color: 'red'
 	},
-	'critical': {
-		string: 'critical_section',
+	'mutex': {
+		string: ['UnLock', 'Lock'],
+		color: '#2196f3'
+	},
+	'MutexA': {
+		string: ['UnLock', 'Lock'],
+		color: '#2196f3'
+	},
+	'MutexB': {
+		string: ['UnLock', 'Lock'],
+		color: '#2196f3'
+	},
+	'MutexC': {
+		string: ['UnLock', 'Lock'],
+		color: '#2196f3'
+	},
+	'panic': {
+		string: 'panic',
+		color: '#2196f3'
+	},
+	'Critical section': {
+		string: 'criticalSection',
 		color: '#2196f3'
 	},
 	'comment': {
 		string: null,
-		color: '#333'
+		color: '#999'
 	}
 }
