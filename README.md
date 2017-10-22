@@ -37,3 +37,18 @@ deepcopier
 https://github.com/ulule/deepcopier
 
 deepcopier is open source and released under the MIT Licence.
+
+
+# Snapshot
+
+![](./snapshot/index.png)
+
+![](./snapshot/level1.png)
+
+![](./snapshot/level2.png)
+
+![](./snapshot/level3.png)
+
+![](./snapshot/level4.png)
+
+![](./snapshot/level5.png)
