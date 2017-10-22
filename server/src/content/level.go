@@ -105,7 +105,7 @@ func GetLevel(id int) *Level {
 						e.NewStartIfStatement(
 							e.NewEqualityExpression(e.NewVariableExpression("i"), e.NewLiteralExpression(5)), "if",
 						),
-						e.NewCriticalSectionExpression(),
+						e.NewPanicIns("exit_here"),
 						e.NewEndIfStatement("if"),
 						e.NewMutexUnLockIns("mutex"),
 						e.NewEndForIns("for"),
@@ -114,7 +114,6 @@ func GetLevel(id int) *Level {
 				e.DefaultThreadContext(
 					1, &[]e.Instruction{
 						e.NewForStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "for"),
-						e.NewCriticalSectionExpression(),
 						e.NewMutexLockIns("mutex"),
 						e.NewAssignmentInstruction("i", e.NewAdditionExpression(e.NewVariableExpression("i"), e.NewLiteralExpression(-1))),
 						e.NewMutexUnLockIns("mutex"),
@@ -165,6 +164,36 @@ func GetLevel(id int) *Level {
 				Key: "MutexB", Value: e.GlobalStateType{Name: "MutexB", Value: &e.Lock{LastLockedThreadID: -1, LockCount: 0}},
 			}, e.Pair{
 				Key: "MutexC", Value: e.GlobalStateType{Name: "MutexC", Value: &e.Lock{LastLockedThreadID: -1, LockCount: 0}},
+			}),
+		}
+	case 4:
+		return &Level{
+			"",
+			"",
+			"",
+			[]*e.ThreadContext{
+				e.DefaultThreadContext(0, &[]e.Instruction{
+					e.NewCommentInstruction("初始化了一个channel"),
+					e.NewCommentInstruction("messages := make(chan string)"),
+					e.NewDummyInstruction("other_logic"),
+					e.NewCommentInstruction("从channel读取一个数据"),
+					e.NewChanReadIns("messages"),
+					e.NewDummyInstruction("other_logic"),
+					e.NewCriticalSectionExpression(),
+				}),
+				e.DefaultThreadContext(1, &[]e.Instruction{
+					e.NewCommentInstruction("初始化了一个channel"),
+					e.NewCommentInstruction("messages := make(chan string)"),
+					e.NewDummyInstruction("other_logic"),
+					e.NewCommentInstruction("向channel写入一个数据"),
+					e.NewCommentInstruction("若无goroutine请求此数据会被阻塞"),
+					e.NewChanWriteIns("messages", "Hello Golang!"),
+					e.NewDummyInstruction("other_logic"),
+					e.NewCriticalSectionExpression(),
+				}),
+			},
+			e.NewGlobalContext(e.Pair{
+				Key: "messages", Value: e.GlobalStateType{Name: "messages", Value: &e.Channel{ReaderReady: false, WriterReady: false, DataReady: false}},
 			}),
 		}
 	default:

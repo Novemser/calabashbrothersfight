@@ -111,7 +111,7 @@ type PanicInstruction struct {
 func NewPanicIns(msg string) *PanicInstruction {
 	return &PanicInstruction{
 		baseInstruction{
-			Code:        MethodCall("panic", msg),
+			Code:        InstructionExpr(MethodCall("panic", "\""+msg+"\"")),
 			Name:        "panic",
 			Description: "Exit program",
 		},
@@ -328,7 +328,7 @@ func End() string {
 }
 
 func InstructionExpr(code string) string {
-	return code + ";"
+	return code + ""
 }
 
 func AssignmentExpr(left Expression, right Expression) string {

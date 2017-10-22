@@ -54,3 +54,20 @@ for {
 
 
 
+////////////////////////////////////////////////
+                 分割线
+////////////////////////////////////////////////
+// 初始化了一个channel
+// messages := make(chan string)
+other_logic()
+// 从channel读取一个数据
+<-messages
+other_logic()
+
+// 初始化了一个channel
+// messages := make(chan string)
+other_logic()
+// 向channel写入一个数据
+// 若无goroutine请求此数据会被阻塞
+messages <- "Hi"
+other_logic()

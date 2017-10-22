@@ -7,6 +7,12 @@ type Lock struct {
 	LockCount          int
 }
 
+type Channel struct {
+	ReaderReady bool
+	WriterReady bool
+	DataReady   bool
+}
+
 type MutexLockInstruction struct {
 	baseInstruction
 	lockName string
@@ -15,6 +21,39 @@ type MutexLockInstruction struct {
 type MutexUnlockInstruction struct {
 	baseInstruction
 	lockName string
+}
+
+type ChannelReadInstruction struct {
+	baseInstruction
+	chanName string
+}
+
+type ChannelWriteInstruction struct {
+	baseInstruction
+	chanName string
+}
+
+func (i *ChannelWriteInstruction) IsBlocking(gc *GlobalContext, tc *ThreadContext) bool {
+	chanObj := gc.Values[i.chanName].Value.(*Channel)
+
+	if chanObj.ReaderReady {
+		return false
+	} else {
+		// If blocked, writer is ready.
+		chanObj.WriterReady = true
+		return true
+	}
+}
+
+func (i *ChannelReadInstruction) IsBlocking(gc *GlobalContext, tc *ThreadContext) bool {
+	chanObj := gc.Values[i.chanName].Value.(*Channel)
+
+	if !chanObj.DataReady {
+		chanObj.ReaderReady = true
+		return true
+	} else {
+		return false
+	}
 }
 
 func (i *MutexLockInstruction) IsBlocking(gc *GlobalContext, tc *ThreadContext) bool {
@@ -27,6 +66,26 @@ func (i *MutexLockInstruction) IsBlocking(gc *GlobalContext, tc *ThreadContext) 
 	} else {
 		gc.LockMsg = "Thread " + fmt.Sprint(tc.Id) + " occupied lock " + i.lockName
 		return false
+	}
+}
+
+func NewChanReadIns(name string) *ChannelReadInstruction {
+	return &ChannelReadInstruction{
+		baseInstruction{
+			Code:        "<-\"" + name + "\"",
+			Description: "Channel read",
+			Name:        "chan read",
+		}, name,
+	}
+}
+
+func NewChanWriteIns(name string, value string) *ChannelWriteInstruction {
+	return &ChannelWriteInstruction{
+		baseInstruction{
+			Code:        name + " <- \"" + value + "\"",
+			Description: "Channel write",
+			Name:        "chan write",
+		}, name,
 	}
 }
 
@@ -52,6 +111,17 @@ func NewMutexUnLockIns(name string) *MutexUnlockInstruction {
 			Description: "A mutex unlock",
 		}, name,
 	}
+}
+
+func (i *ChannelWriteInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
+	chanObj := gc.Values[i.chanName].Value.(*Channel)
+	chanObj.DataReady = true
+	moveToNextInstruction(tc)
+}
+
+func (i *ChannelReadInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
+	//chanObj := gc.Values[i.chanName].Value.(*Channel)
+	moveToNextInstruction(tc)
 }
 
 func (i *MutexLockInstruction) Execute(gc *GlobalContext, tc *ThreadContext) {
