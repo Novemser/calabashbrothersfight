@@ -78,6 +78,10 @@
 		.introduction
 			.high-light
 				color red
+		.objective
+			font-size 18px
+			span
+				color red
 		.panel
 			display flex
 			flex-flow row nowrap
