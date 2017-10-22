@@ -35,9 +35,6 @@ func startLevel(levelId int) {
 	gameState.ThreadContexts = level.ThreadContexts
 	gameState.Level = *level
 
-	//for i := 0; i < len(level.ThreadContexts[0].Instructions); i++ {
-	//	stepThread(0)
-	//}
 }
 
 func areAllThreadsBlocked() bool {
