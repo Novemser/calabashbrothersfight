@@ -23,3 +23,11 @@ Muse-UI
 https://github.com/museui/muse-ui
 
 muse-ui is open source and released under the MIT Licence.
+
+---------------------------------------------
+
+deepcopier
+
+https://github.com/ulule/deepcopier
+
+deepcopier is open source and released under the MIT Licence.
