@@ -112,6 +112,7 @@
 						white-space pre
 					&.current
 						background #f3ff74
+						font-weight bold
 					.block
 						.comment
 							font-family "PINGFANG SC"
