@@ -1,5 +1,11 @@
 # calabashbrothersfight
 :boy:An interesting online interactive Go tutorial concerning about multi-threading
+
+![](https://img.shields.io/badge/iris-v8.5.3-brightgreen.svg)
+![](https://img.shields.io/badge/vue-v2.4.2-brightgreen.svg)
+![](https://img.shields.io/badge/muse--ui-v2.1.0-brightgreen.svg)
+![](https://img.shields.io/badge/tippy.js-v1.4.0-brightgreen.svg)
+
 # 使用协议
 ---------------------------------------------
 iris 开源项目
