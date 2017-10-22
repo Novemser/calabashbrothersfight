@@ -10,6 +10,7 @@
 								  secondary></mu-raised-button>
 			</div>
 		</div>
+		<p class="objective"><span>目标：</span>{{ victoryCond }}</p>
 		<h2 class="subtitle" title="thread">代码</h2>
 		<div class="source">
 			<div v-for="(program, thread) in programs" class="thread" :key="thread">
@@ -64,6 +65,7 @@
 				label: '',
 				title: '',
 				description: '',
+				victoryCond: '',
 				programs: [],
 				context: [],
 				gameStatus: 0,
@@ -243,6 +245,7 @@
 				this.label = data.label
 				this.title = data.title
 				this.description = data.description
+				this.victoryCond = data.victoryCond
 				this.programs = data.programs
 				this.context = data.context
 				this.gameStatus = data.gameStatus
