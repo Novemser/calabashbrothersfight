@@ -71,6 +71,7 @@ func checkForVictoryConditions() {
 	for threadId, t := range gameState.Level.ThreadContexts {
 
 		if IsThreadFinished(threadId) {
+			lose("Thread terminated")
 			continue
 		}
 		var thread = gameState.Level.ThreadContexts[threadId]
@@ -284,10 +285,14 @@ func packageData() LevelInfo {
 
 			p.Code = append(p.Code, coder)
 		}
+		if runState == -1 {
+			p.CanStepNext = !IsThreadFinished(pro.Id) && !IsThreadBlocked(pro.Id)
+			p.Current = []int{pro.ProgramCounter, pro.ExpProgramCounter}
+		} else {
+			var temp = (*pro.Instructions)[pro.ProgramCounter]
+			p.CanCurrentExpand = temp != nil && len(temp.GetExpandInstructions()) > 0
+		}
 
-		var temp = (*pro.Instructions)[pro.ProgramCounter]
-
-		p.CanCurrentExpand = temp != nil && len(temp.GetExpandInstructions()) > 0
 		p.CanStepNext = !IsThreadFinished(pro.Id) && !IsThreadBlocked(pro.Id)
 		p.Current = []int{pro.ProgramCounter, pro.ExpProgramCounter}
 
