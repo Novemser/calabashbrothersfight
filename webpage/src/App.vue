@@ -64,7 +64,7 @@
 		.container
 			transition all .6s ease
 			margin 16px
-			/*width 1280px*/
+			width 1280px
 
 	.section
 		text-align left
@@ -80,6 +80,7 @@
 			align-items flex-start
 			.introduction
 				margin 0 16px 0 0
+				font-size 18px
 			.source-controls
 				display flex
 				flex-flow row
@@ -116,7 +117,6 @@
 		.context
 			margin 32px 0 0
 			.variable
-
 				font-size 18px
 		.subtitle
 			margin 16px 0

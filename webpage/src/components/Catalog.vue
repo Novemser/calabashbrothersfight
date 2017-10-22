@@ -7,7 +7,7 @@
 		<p>在你面前是一系列的用<span class="high-light">Go</span>语言写的并行程序的若干个<span class="high-light">协程</span>(Goroutines)。</p>
 		<p>你的目标就是使用任何方式尝试使其运行<span class="high-light">故障</span>。</p>
 		<p>比如，你让两个协程同时执行到<span class="high-light">临界区</span>。(critical_section)</p>
-		<p>或者，尝试到达Debug.Assert(false);</p>
+		<p>或者，尝试到达panic("exit_here")</p>
 	</div>
 </template>
 

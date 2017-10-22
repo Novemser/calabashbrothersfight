@@ -1,6 +1,5 @@
 <template>
 	<div class="section">
-		<mu-linear-progress v-show="loading" ></mu-linear-progress>
 		<h1 class="title">{{ title }}</h1>
 		<div class="panel">
 			<p class="introduction" v-html="description"></p>
@@ -30,7 +29,7 @@
 							<span class="block" :title="expression['description']"
 								  v-html="highlight(expression['code'], expression['name'])"></span>
 						</div>
-						<div class="instruction" v-if="expression['expanded']" :key="_index"
+						<div class="instruction" v-if="expression['expanded']" :key="_index" style="font-size: 14px"
 							 v-for="(_expression, _index) in expression['expandInstructions']"
 							 :class="{ current: program['current'][1] === _index }" >
 							<span class="indent">{{ expression['indent'] + 1 | showTab }}</span>
@@ -61,7 +60,6 @@
 		props: {},
 		data () {
 			return {
-				loading: false,
 				level: 0,
 				title: '',
 				description: '',
@@ -74,9 +72,7 @@
 		},
 		methods: {
 			fetchData (url, cb = function () {}) {
-				this.loading = true
 				this.axios.get(url).then((response) => {
-					this.loading = false
 					if (response && response.data) {
 						const data = response.data
 						if (data.status === 0) {
@@ -291,6 +287,13 @@
 			highlight: function (code, name) {
 				const rule = hightlightRules[name]
 				if (!rule) return code
+				if (!rule.string) return `<span style="color:${rule.color}">${code}</span>`
+				if (Array.isArray(rule.string)) {
+					rule.string.forEach(function (str) {
+						code = code.replace(str, `<span style="color:${rule.color}">${str}</span>`)
+					})
+					return code
+				}
 				return code.replace(rule.string, `<span style="color:${rule.color}">${rule.string}</span>`)
 			}
 		},
