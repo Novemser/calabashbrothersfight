@@ -122,7 +122,4 @@
 			margin 16px 0
 			border-bottom 1px solid THEME_COLOR
 
-
-
-
 </style>
