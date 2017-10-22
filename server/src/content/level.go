@@ -5,11 +5,12 @@ import (
 )
 
 type Level struct {
-	Label          string
-	Title          string
-	Description    string
-	ThreadContexts []*e.ThreadContext
-	GlobalContext  *e.GlobalContext
+	Label            string
+	Title            string
+	Description      string
+	VictoryCondition string
+	ThreadContexts   []*e.ThreadContext
+	GlobalContext    *e.GlobalContext
 }
 
 func GetLevel(id int) *Level {
@@ -19,6 +20,7 @@ func GetLevel(id int) *Level {
 			"初级教程1",
 			"你渴望力量吗",
 			"这是一个能模拟多线程并发执行的在线教程，在我们的故事中，变身葫芦娃，拒绝平庸，挑战极限。相信你一定能通过考验。",
+			"同时让所有协程进入临界区",
 			[]*e.ThreadContext{
 				e.DefaultThreadContext(
 					0, &[]e.Instruction{
@@ -49,6 +51,7 @@ func GetLevel(id int) *Level {
 			"初级教程2",
 			"魔鬼般的赋值语句",
 			"欢迎来到葫芦娃的王国。在这里,7只英勇的葫芦娃将与诡计多端的白骨精展开一场计算机科学的较量。并且，似乎还隐藏着更多的恶势力……",
+			"同时让所有协程进入临界区",
 			[]*e.ThreadContext{
 				e.DefaultThreadContext(
 					0, &[]e.Instruction{
@@ -96,6 +99,7 @@ func GetLevel(id int) *Level {
 			"初级教程3",
 			"装甲再厚也能打破",
 			"葫芦兄弟的火娃被白骨精打伤，落单了，这时候蜘蛛精穿着她的蛛丝做的新盔甲要抓他，尽管她的盔甲用上了互斥锁，但是还是有弱点，抓住时机，利用两个线程，一举击败她。",
+			"让协程-0执行panic语句",
 			[]*e.ThreadContext{
 				e.DefaultThreadContext(
 					0, &[]e.Instruction{
@@ -132,6 +136,7 @@ func GetLevel(id int) *Level {
 			"初级教程4",
 			"武功再高也怕菜刀",
 			"葫芦兄弟正在和白骨精正面战斗，老爷爷这时却遇到了麻烦，蛇精化身为3头巨蛇怪来吃他，没有葫芦兄弟那样本领的爷爷只好手握菜刀，伺机而动。他发现这三头巨蛇虽然强大，但是并不灵活，爷爷想到用死锁的方法，然这3个头互相攻击，循环等待，击败巨蛇。",
+			"让三个协程发生死锁",
 			[]*e.ThreadContext{
 				e.DefaultThreadContext(0, &[]e.Instruction{
 					e.NewForStartIns(e.NewEqualityExpression(e.NewLiteralExpression(1), e.NewLiteralExpression(1)), "for"),
@@ -171,6 +176,7 @@ func GetLevel(id int) *Level {
 			"初级教程4",
 			"穿越时空去见你",
 			"经过激烈的交战，葫芦娃和白骨精两败俱伤。就在千钧一刻，老爷爷发现了一个时空隧道，可以通过这个隧道在交战双方的场地来回。机智的老爷爷钻入了隧道，悄悄地来到了已经虚弱的白骨精背后。<br/>至于老爷爷是否能够成功袭击白骨精，就看你了！",
+			"同时让所有协程进入临界区，注意channel的执行顺序",
 			[]*e.ThreadContext{
 				e.DefaultThreadContext(0, &[]e.Instruction{
 					e.NewCommentInstruction("初始化了一个channel"),

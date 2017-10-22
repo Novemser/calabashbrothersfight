@@ -10,13 +10,24 @@ import (
 	"strconv"
 	"execution"
 	"reflect"
+	"github.com/kataras/iris/context"
+	"deepcopy"
+	"github.com/ulule/deepcopier"
 )
 
 var gameState = new(c.GameState)
 var undoHistory = list.New()
 
 func saveForUndo() {
-	var history = c.History{gameState.ThreadContexts, gameState.GlobalState}
+	var tmpThreadCtx = []execution.ThreadContext{}
+
+	for _, tc := range gameState.ThreadContexts {
+		ctx := &execution.ThreadContext{}
+		deepcopier.Copy(tc).To(ctx)
+		tmpThreadCtx = append(tmpThreadCtx, *ctx)
+	}
+
+	var history = c.History{tmpThreadCtx, deepcopy.Copy(*gameState.GlobalState).(execution.GlobalContext)}
 	undoHistory.PushBack(history)
 }
 
@@ -115,8 +126,16 @@ func undo() {
 
 	for e := undoHistory.Front(); e != nil; e = e.Next() {
 		if e.Next() == nil {
-			gameState.GlobalState = e.Value.(c.History).GlobalContext
-			gameState.ThreadContexts = e.Value.(c.History).ThreadContext
+			temp := e.Value.(c.History).GlobalContext
+			gameState.GlobalState = &temp
+			var tmpThreadCtx = []*execution.ThreadContext{}
+			for _, tx := range e.Value.(c.History).ThreadContext {
+				tv := &execution.ThreadContext{}
+				deepcopier.Copy(tx).To(tv)
+				tmpThreadCtx = append(tmpThreadCtx, tv)
+			}
+
+			gameState.ThreadContexts = tmpThreadCtx
 			undoHistory.Remove(e)
 		}
 	}
@@ -180,6 +199,7 @@ type LevelInfo struct {
 	GameStatus  int           `json:"gameStatus"`
 	Context     []ContextType `json:"context"`
 	CanUndo     bool          `json:"canUndo"`
+	VictoryCond string        `json:"victoryCond"`
 }
 
 func checkCanUndo() bool {
@@ -245,6 +265,7 @@ func packageData() LevelInfo {
 	levelInfo := LevelInfo{}
 	levelInfo.Title = gameState.Level.Title
 	levelInfo.Label = gameState.Level.Label
+	levelInfo.VictoryCond = gameState.Level.VictoryCondition
 
 	levelInfo.CanUndo = checkCanUndo()
 	levelInfo.Description = gameState.Level.Description
@@ -303,6 +324,12 @@ func main() {
 	app := iris.New()
 	app.Use(recover.New())
 	app.Use(logger.New())
+
+	app.Get("/", func(context context.Context) {
+		context.ServeFile("/home/novemser/Documents/Code/Hackathon/GoLangPingCAP/dist/index.html", true)
+	})
+
+	app.StaticServe("/home/novemser/Documents/Code/Hackathon/GoLangPingCAP/dist/static", "/static")
 
 	// 加载关卡
 	app.Get("/api/level/{id}", func(ctx iris.Context) {
