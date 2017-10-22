@@ -23,12 +23,12 @@ func GetLevel(id int) *Level {
 				e.DefaultThreadContext(
 					0, &[]e.Instruction{
 						e.NewCommentInstruction("下面这一行是与多线程无关的业务代码"),
-						e.NewDummyInstruction("do_dummy_things"),
+						e.NewDummyInstruction("doDummyThings"),
 						e.NewCommentInstruction("下面是\"临界区\"代码块,多个线程不能同时访问"),
 						e.NewCommentInstruction("你的目标是让所有的代码都一起进入临界区"),
 						e.NewCriticalSectionExpression(),
 						e.NewCommentInstruction("又是一行没用的业务代码"),
-						e.NewDummyInstruction("do_dummy_things"),
+						e.NewDummyInstruction("doDummyThings"),
 					},
 				),
 				e.DefaultThreadContext(
@@ -105,7 +105,7 @@ func GetLevel(id int) *Level {
 						e.NewStartIfStatement(
 							e.NewEqualityExpression(e.NewVariableExpression("i"), e.NewLiteralExpression(5)), "if",
 						),
-						e.NewPanicIns("exit_here"),
+						e.NewPanicIns("exitHere"),
 						e.NewEndIfStatement("if"),
 						e.NewMutexUnLockIns("mutex"),
 						e.NewEndForIns("for"),
@@ -168,27 +168,27 @@ func GetLevel(id int) *Level {
 		}
 	case 4:
 		return &Level{
-			"",
-			"",
-			"",
+			"初级教程4",
+			"穿越时空去见你",
+			"经过激烈的交战，葫芦娃和白骨精两败俱伤。就在千钧一刻，老爷爷发现了一个时空隧道，可以通过这个隧道在交战双方的场地来回。机智的老爷爷钻入了隧道，悄悄地来到了已经虚弱的白骨精背后。<br/>至于老爷爷是否能够成功袭击白骨精，就看你了！",
 			[]*e.ThreadContext{
 				e.DefaultThreadContext(0, &[]e.Instruction{
 					e.NewCommentInstruction("初始化了一个channel"),
 					e.NewCommentInstruction("messages := make(chan string)"),
-					e.NewDummyInstruction("other_logic"),
+					e.NewDummyInstruction("otherLogic"),
 					e.NewCommentInstruction("从channel读取一个数据"),
 					e.NewChanReadIns("messages"),
-					e.NewDummyInstruction("other_logic"),
+					e.NewDummyInstruction("otherLogic"),
 					e.NewCriticalSectionExpression(),
 				}),
 				e.DefaultThreadContext(1, &[]e.Instruction{
 					e.NewCommentInstruction("初始化了一个channel"),
 					e.NewCommentInstruction("messages := make(chan string)"),
-					e.NewDummyInstruction("other_logic"),
+					e.NewDummyInstruction("otherLogic"),
 					e.NewCommentInstruction("向channel写入一个数据"),
 					e.NewCommentInstruction("若无goroutine请求此数据会被阻塞"),
 					e.NewChanWriteIns("messages", "Hello Golang!"),
-					e.NewDummyInstruction("other_logic"),
+					e.NewDummyInstruction("otherLogic"),
 					e.NewCriticalSectionExpression(),
 				}),
 			},
