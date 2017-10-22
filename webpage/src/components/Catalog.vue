@@ -8,6 +8,7 @@
 		<p>你的目标就是使用任何方式尝试使其运行<span class="high-light">故障</span>。</p>
 		<p>比如，你让两个协程同时执行到<span class="high-light">临界区</span>。(critical_section)</p>
 		<p>或者，尝试到达panic("exit_here")</p>
+		<p>请到左侧侧边栏选择关卡开始~~~</p>
 	</div>
 </template>
 
@@ -30,5 +31,5 @@
 		.high-light
 			color red
 		.logo
-			width 900px
+			width 800px
 </style>

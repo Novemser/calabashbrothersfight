@@ -64,7 +64,12 @@
 		.container
 			transition all .6s ease
 			margin 16px
-			width 1280px
+			width 1024px
+
+	@media (max-width: 960px)
+		.main-content
+			.container
+				width 800px
 
 	.section
 		text-align left

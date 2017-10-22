@@ -1,6 +1,6 @@
 <template>
 	<div class="section">
-		<h1 class="title">{{ title }}</h1>
+		<h1 class="title">{{ label }} - {{ title }}</h1>
 		<div class="panel">
 			<p class="introduction" v-html="description"></p>
 			<div class="source-controls">
@@ -61,6 +61,7 @@
 		data () {
 			return {
 				level: 0,
+				label: '',
 				title: '',
 				description: '',
 				programs: [],
@@ -239,6 +240,7 @@
 				}
 			},
 			load (data, cb) {
+				this.label = data.label
 				this.title = data.title
 				this.description = data.description
 				this.programs = data.programs
