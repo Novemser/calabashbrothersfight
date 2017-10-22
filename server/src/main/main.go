@@ -174,6 +174,7 @@ func IsLevelPristine() bool {
 // View Model
 type LevelInfo struct {
 	Title       string        `json:"title"`
+	Label       string        `json:"label"`
 	Description string        `json:"description"`
 	Programs    []Program     `json:"programs"`
 	GameStatus  int           `json:"gameStatus"`
@@ -243,6 +244,8 @@ func packageData() LevelInfo {
 
 	levelInfo := LevelInfo{}
 	levelInfo.Title = gameState.Level.Title
+	levelInfo.Label = gameState.Level.Label
+
 	levelInfo.CanUndo = checkCanUndo()
 	levelInfo.Description = gameState.Level.Description
 	levelInfo.GameStatus = runState
