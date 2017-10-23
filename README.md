@@ -52,3 +52,10 @@ deepcopier is open source and released under the MIT Licence.
 ![](./snapshot/level4.png)
 
 ![](./snapshot/level5.png)
+
+# Authors
+* [@Novemser](https://github.com/Novemser)
+* [@yokoyang](https://github.com/yokoyang)
+* [@tsengkasing](https://github.com/tsengkasing)
+
+Made with Love & Passion
